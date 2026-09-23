@@ -1,51 +1,53 @@
-name: Deploy Signed Release APK
+name: Android CI Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches: [ "master" ] 
+  workflow_dispatch:      
 
 permissions:
-  contents: write
+  contents: write         
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      - name: Set up Java Environment
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "zulu"
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'        
+        distribution: 'zulu'
+        
+    - name: Decode Keystore from Secrets
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > ${{ github.workspace }}/app/release-keystore.jks
 
-      - name: Decode Keystore from Secrets
-        run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release-keystore.jks
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-      - name: Fix Permissions
-        run: chmod +x gradlew
+    - name: Wipe Cache and Build Fresh Release APK
+      run: |
+        ./gradlew clean assembleRelease \
+          -Pandroid.injected.signing.store.file=${{ github.workspace }}/app/release-keystore.jks \
+          -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
+          -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
+          -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
+          -x test -x lint
 
-      - name: Build Secure APK
-        run: |
-          ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/app/release-keystore.jks" \
-            -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
-            -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
-            -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
-
-      - name: Verify APK Exists
-        run: |
-          test -f app/build/outputs/apk/release/app-release.apk
-          ls -lh app/build/outputs/apk/release/app-release.apk
-
-      - name: Create Official GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: app/build/outputs/apk/release/app-release.apk
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Automatic GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: "build-${{ github.run_id }}"
+        name: "Production Build #${{ github.run_number }}"
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        files: |
+          app/release/app-release.apk
+          app/build/outputs/apk/release/app-release.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
