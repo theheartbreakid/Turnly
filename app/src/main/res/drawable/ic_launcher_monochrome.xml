@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed (monochrome) layer for Android 13+ themed icons. System tints it; colour here is irrelevant. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FF000000" android:pathData="M28.8,57.48A25.3,25.3 0 0 1 43.51,32.18Q44.34,31.82 44.3,32.72A9.7,9.7 0 0 0 49.83,41.46Q50.66,41.81 50.79,42.33L50.82,42.45Q50.95,42.97 50.09,43.22A12.6,12.6 0 0 0 41.67,57.8Q41.89,58.67 41.16,58.88L40.99,58.93Q40.26,59.14 39.01,58.31A9.3,9.3 0 0 0 30.26,58.18Q28.98,58.97 28.8,57.48Z" />
+    <path android:fillColor="#FF000000" android:pathData="M65.03,32.43A25.3,25.3 0 0 1 79.14,58.08Q79.02,58.97 78.27,58.47A9.3,9.3 0 0 0 68.47,58.62Q67.74,59.14 67.01,58.93L66.84,58.88Q66.11,58.67 66.33,57.8A12.6,12.6 0 0 0 57.91,43.22Q57.05,42.97 57.18,42.45L57.21,42.33Q57.34,41.81 58.7,41.18A9.7,9.7 0 0 0 63.68,33.32Q63.66,31.82 65.03,32.43Z" />
+    <path android:fillColor="#FF000000" android:pathData="M68.58,75.88A25.3,25.3 0 0 1 38.94,75.53Q38.22,74.98 39.03,74.58A9.3,9.3 0 0 0 43.8,66.02Q43.72,65.13 44.27,64.6L44.39,64.48Q44.94,63.95 45.58,64.58A12.6,12.6 0 0 0 62.42,64.58Q63.06,63.95 63.61,64.48L63.73,64.6Q64.28,65.13 64.19,66.62A9.3,9.3 0 0 0 68.46,74.27Q69.78,74.98 68.58,75.88Z" />
+    <path android:fillColor="#FF000000" android:pathData="M47.3,32.7a6.7,6.7 0 1 1 13.4,0a6.7,6.7 0 1 1 -13.4,0Z" />
+    <path android:fillColor="#FF000000" android:pathData="M28.21,66.45a6.3,6.3 0 1 1 12.6,0a6.3,6.3 0 1 1 -12.6,0Z" />
+    <path android:fillColor="#FF000000" android:pathData="M67.19,66.45a6.3,6.3 0 1 1 12.6,0a6.3,6.3 0 1 1 -12.6,0Z" />
+</vector>

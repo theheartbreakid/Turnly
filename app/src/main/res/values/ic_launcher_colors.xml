@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Turnly launcher icon palette. Self-contained; not used by the app theme. -->
+<resources>
+    <color name="ic_launcher_background_start">#FFFFFF</color>
+    <color name="ic_launcher_background_end">#E9EFFD</color>
+    <color name="ic_launcher_dot_top_start">#4CC2FF</color>
+    <color name="ic_launcher_dot_top_end">#2B84FF</color>
+    <color name="ic_launcher_dot_left_start">#40AAFF</color>
+    <color name="ic_launcher_dot_left_end">#2C7BFF</color>
+    <color name="ic_launcher_dot_right_start">#B187F6</color>
+    <color name="ic_launcher_dot_right_end">#7B44DA</color>
+    <color name="ic_launcher_arc_ul_start">#48C6FF</color>
+    <color name="ic_launcher_arc_ul_end">#4270F6</color>
+    <color name="ic_launcher_arc_ur_start">#4A6CFF</color>
+    <color name="ic_launcher_arc_ur_end">#7446E4</color>
+    <color name="ic_launcher_arc_bot_start">#4A90FF</color>
+    <color name="ic_launcher_arc_bot_end">#7A44E6</color>
+</resources>
