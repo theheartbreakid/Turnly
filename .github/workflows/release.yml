@@ -15,6 +15,8 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Crucial: Fetches all history & tags so the version calculator can read the past release version
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -38,14 +40,38 @@ jobs:
           -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}" \
           -x test -x lint
 
+    # AUTOMATED STEP: Calculates the next 0.0.1 bump dynamically
+    - name: Calculate Next Version Tag
+      id: tagger
+      run: |
+        # Fetch latest tag, fallback to v0.0.0 if no tag exists yet
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        echo "Current Tag: $LATEST_TAG"
+        
+        # Strip the 'v' and break the version into numbers
+        VERSION_CLEAN=${LATEST_TAG#v}
+        IFS='.' read -r major minor patch <<< "$VERSION_CLEAN"
+        
+        # Force defaults if parsing fails
+        MAJOR=${major:-0}
+        MINOR=${minor:-0}
+        PATCH=${patch:-0}
+        
+        # Increment the patch value by 1
+        NEXT_PATCH=$((PATCH + 1))
+        NEXT_TAG="v$MAJOR.$MINOR.$NEXT_PATCH"
+        
+        echo "Next Tag: $NEXT_TAG"
+        echo "next_version=$NEXT_TAG" >> $GITHUB_OUTPUT
+
     - name: Automatic GitHub Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: "build-${{ github.run_id }}"
-        name: "Production Build #${{ github.run_number }}"
+        tag_name: "${{ steps.tagger.outputs.next_version }}"
+        name: "Production Build ${{ steps.tagger.outputs.next_version }}" # Keep same dynamic clean title format
         draft: false
         prerelease: false
-        generate_release_notes: true
+        generate_release_notes: true # Auto-generates your what's-changed log based on commits
         files: |
           app/release/app-release.apk
           app/build/outputs/apk/release/app-release.apk
