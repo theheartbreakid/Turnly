@@ -23,7 +23,6 @@
 
 # CameraX
 -dontwarn androidx.camera.**
--keep class androidx.camera.** { *; }
 -dontwarn androidx.camera.core.impl.**
 
 # Coil Image Loader
