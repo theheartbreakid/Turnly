@@ -24,6 +24,7 @@ class TurnlyApplication : Application() {
     val userPreferencesRepository: UserPreferencesRepository by lazy { UserPreferencesRepository(this) }
     val hapticManager: com.crescentapps.turnly.core.util.HapticManager by lazy { com.crescentapps.turnly.core.util.HapticManager(this) }
     val soundManager: com.crescentapps.turnly.core.util.SoundManager by lazy { com.crescentapps.turnly.core.util.SoundManager(this) }
+    val updateManager: com.crescentapps.turnly.core.update.UpdateManager by lazy { com.crescentapps.turnly.core.update.UpdateManager.getInstance(this) }
 
     val roomService: RoomService by lazy { MockRoomService() }
     val realtimeSyncClient: RealtimeSyncClient by lazy { MockRealtimeSyncClient() }
@@ -50,6 +51,10 @@ class TurnlyApplication : Application() {
             if (prefs.onlineSyncEnabled) {
                 SyncWorker.schedulePeriodicSync(this@TurnlyApplication, prefs.syncOverMobileData)
             }
+            com.crescentapps.turnly.core.update.UpdateCheckWorker.schedule(
+                this@TurnlyApplication,
+                prefs.updateCheckFrequency
+            )
         }
     }
 }

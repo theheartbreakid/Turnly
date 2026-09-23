@@ -60,3 +60,12 @@ enum class UiMode(val displayName: String, val badge: String) {
     MATERIAL_3("Material 3", "Stable · Recommended"),
     LIQUID("Liquid UI", "Experimental")
 }
+
+@Serializable
+enum class UpdateFrequency(val displayName: String, val daysInterval: Long) {
+    OFF("Off", 0L),
+    DAILY("Daily", 1L),
+    WEEKLY("Weekly", 7L),
+    MONTHLY("Monthly", 30L)
+}
+

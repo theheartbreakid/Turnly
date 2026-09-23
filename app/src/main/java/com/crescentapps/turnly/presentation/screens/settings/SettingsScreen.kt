@@ -23,6 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.crescentapps.turnly.core.model.UpdateFrequency
+import com.crescentapps.turnly.core.update.model.UpdateState
+import java.text.SimpleDateFormat
+import java.util.Date
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,8 +39,12 @@ import com.crescentapps.turnly.core.model.ThemeMode
 import com.crescentapps.turnly.data.preferences.UserPreferencesRepository
 import com.crescentapps.turnly.presentation.catalog.utils.LocalBackdrop
 import com.crescentapps.turnly.presentation.components.AdaptiveIcon
+import com.crescentapps.turnly.presentation.components.GlassSettings
 import com.crescentapps.turnly.presentation.components.LocalAppWindowSizeDetails
+import com.crescentapps.turnly.presentation.components.LocalGlassSettings
 import com.crescentapps.turnly.presentation.components.LocalPrismalAdaptiveColor
+import com.crescentapps.turnly.presentation.components.LocalScrollInProgress
+import com.crescentapps.turnly.presentation.components.PrismalCard
 import com.crescentapps.turnly.presentation.components.liquid.LiquidButton
 import com.crescentapps.turnly.presentation.components.liquid.LiquidCard
 import com.crescentapps.turnly.presentation.components.liquid.LiquidDialog
@@ -57,7 +65,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
-    val prefs by viewModel.preferences.collectAsState()
+    val prefs by viewModel.effectivePreferences.collectAsState()
     val context = LocalContext.current
     val backdrop = LocalBackdrop.current ?: rememberLayerBackdrop()
     val adaptiveColor = LocalPrismalAdaptiveColor.current
@@ -75,6 +83,9 @@ fun SettingsScreen(
     var showResetAppearanceDialog by remember { mutableStateOf(false) }
     var showResetAllSettingsDialog by remember { mutableStateOf(false) }
     var showResetDataDialog by remember { mutableStateOf(false) }
+    var showFrequencyDialog by remember { mutableStateOf(false) }
+
+    val updateState by viewModel.updateState.collectAsState()
 
     val backgroundLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -92,16 +103,24 @@ fun SettingsScreen(
         }
     }
 
-    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxHeight()
-                .widthIn(max = 700.dp)
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = if (isWide) 48.dp else 24.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
+    val liveGlassSettings = remember(prefs) {
+        GlassSettings.fromPreferences(prefs)
+    }
+
+    CompositionLocalProvider(
+        LocalScrollInProgress provides listState.isScrollInProgress,
+        LocalGlassSettings provides liveGlassSettings
+    ) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .widthIn(max = 700.dp)
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = if (isWide) 48.dp else 24.dp, vertical = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
             item(key = "title_settings") {
                 Text(
                     text = "Settings",
@@ -110,6 +129,61 @@ fun SettingsScreen(
                     color = adaptiveColor,
                     modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                 )
+            }
+
+            // LIVE PRISMAL GLASS PREVIEW SHOWCASE
+            if (prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.LIQUID) {
+                item(key = "header_prismal_preview") { SettingsSectionHeader("Live Prismal Glass Preview") }
+                item(key = "card_prismal_preview") {
+                    PrismalCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        tonalColor = adaptiveColor.copy(alpha = 0.08f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 20.dp, vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.AutoAwesome,
+                                        contentDescription = null,
+                                        tint = adaptiveColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = "Prismal OpenGL Surface",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = adaptiveColor
+                                    )
+                                }
+                                Text(
+                                    text = "Active IOR: ${String.format(Locale.ROOT, "%.2f", liveGlassSettings.ior)}  ·  Normal: ${String.format(Locale.ROOT, "%.2f", liveGlassSettings.normalStrength)}  ·  Shininess: ${liveGlassSettings.shininess.toInt()}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = adaptiveColor.copy(alpha = 0.85f)
+                                )
+                                Text(
+                                    text = "Uniforms update dynamically on drag with 0 frame drops",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = adaptiveColor.copy(alpha = 0.6f)
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             // UI STYLE / MODE SELECTION
@@ -217,10 +291,10 @@ fun SettingsScreen(
                                     range = 100f..3000f,
                                     unit = "ms",
                                     backdrop = backdrop,
-                                    defaultValue = UserPreferencesRepository.Defaults.DEFAULT_ADAPTIVE_LUMINANCE_INTERVAL.toFloat()
-                                ) {
-                                    viewModel.setAdaptiveLuminanceInterval(it.toInt())
-                                }
+                                    defaultValue = UserPreferencesRepository.Defaults.DEFAULT_ADAPTIVE_LUMINANCE_INTERVAL.toFloat(),
+                                    onValueChange = { viewModel.updateLiveOverride("adaptiveLuminanceInterval", it.toInt()) },
+                                    onValueChangeFinished = { viewModel.setAdaptiveLuminanceInterval(it.toInt()) }
+                                )
                             }
                         }
 
@@ -251,10 +325,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_INTENSITY * 100f
-                        ) {
-                            viewModel.setGlassIntensity(it / 100f)
-                        }
+                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_INTENSITY * 100f,
+                            onValueChange = { viewModel.updateLiveOverride("glassIntensity", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassIntensity(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -302,9 +376,10 @@ fun SettingsScreen(
             }
 
             // UNIVERSAL GLASS SETTINGS
-            item(key = "header_universal_glass") { SettingsSectionHeader("Universal Glass Settings") }
-            item(key = "card_universal_glass") {
-                LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
+            if (prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.LIQUID) {
+                item(key = "header_universal_glass") { SettingsSectionHeader("Universal Glass Settings") }
+                item(key = "card_universal_glass") {
+                    LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
                     Column {
                         GlassEffectSlider(
                             title = "Corner Radius",
@@ -312,10 +387,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "dp",
                             backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_CORNER_RADIUS
-                        ) {
-                            viewModel.setGlassCornerRadius(it)
-                        }
+                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_CORNER_RADIUS,
+                            onValueChange = { viewModel.updateLiveOverride("glassCornerRadius", it) },
+                            onValueChangeFinished = { viewModel.setGlassCornerRadius(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -325,10 +400,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "dp",
                             backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_BLUR_RADIUS
-                        ) {
-                            viewModel.setGlassBlurRadius(it)
-                        }
+                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_BLUR_RADIUS,
+                            onValueChange = { viewModel.updateLiveOverride("glassBlurRadius", it) },
+                            onValueChangeFinished = { viewModel.setGlassBlurRadius(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -338,10 +413,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "dp",
                             backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_REFRACTION_HEIGHT
-                        ) {
-                            viewModel.setGlassRefractionHeight(it)
-                        }
+                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_REFRACTION_HEIGHT,
+                            onValueChange = { viewModel.updateLiveOverride("glassRefractionHeight", it) },
+                            onValueChangeFinished = { viewModel.setGlassRefractionHeight(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -351,10 +426,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "dp",
                             backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_REFRACTION_AMOUNT
-                        ) {
-                            viewModel.setGlassRefractionAmount(it)
-                        }
+                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_GLASS_REFRACTION_AMOUNT,
+                            onValueChange = { viewModel.updateLiveOverride("glassRefractionAmount", it) },
+                            onValueChangeFinished = { viewModel.setGlassRefractionAmount(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -364,10 +439,10 @@ fun SettingsScreen(
                             range = 0f..1f,
                             unit = "normalized",
                             backdrop = backdrop,
-                            defaultValue = 0.00f
-                        ) {
-                            viewModel.setGlassChromaticAberration(it)
-                        }
+                            defaultValue = 0.00f,
+                            onValueChange = { viewModel.updateLiveOverride("glassChromaticAberration", it) },
+                            onValueChangeFinished = { viewModel.setGlassChromaticAberration(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -377,10 +452,10 @@ fun SettingsScreen(
                             range = 1f..3f,
                             unit = "normalized",
                             backdrop = backdrop,
-                            defaultValue = 1.52f
-                        ) {
-                            viewModel.setGlassIOR(it)
-                        }
+                            defaultValue = 1.52f,
+                            onValueChange = { viewModel.updateLiveOverride("glassIOR", it) },
+                            onValueChangeFinished = { viewModel.setGlassIOR(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -390,10 +465,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "dp",
                             backdrop = backdrop,
-                            defaultValue = 18f
-                        ) {
-                            viewModel.setGlassThickness(it)
-                        }
+                            defaultValue = 18f,
+                            onValueChange = { viewModel.updateLiveOverride("glassThickness", it) },
+                            onValueChangeFinished = { viewModel.setGlassThickness(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -403,10 +478,10 @@ fun SettingsScreen(
                             range = 0f..5f,
                             unit = "normalized",
                             backdrop = backdrop,
-                            defaultValue = 1.1f
-                        ) {
-                            viewModel.setGlassNormalStrength(it)
-                        }
+                            defaultValue = 1.1f,
+                            onValueChange = { viewModel.updateLiveOverride("glassNormalStrength", it) },
+                            onValueChangeFinished = { viewModel.setGlassNormalStrength(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -416,10 +491,10 @@ fun SettingsScreen(
                             range = 0f..200f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 100f
-                        ) {
-                            viewModel.setGlassBrightness(it / 100f)
-                        }
+                            defaultValue = 100f,
+                            onValueChange = { viewModel.updateLiveOverride("glassBrightness", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassBrightness(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -429,10 +504,10 @@ fun SettingsScreen(
                             range = 0f..200f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 85f
-                        ) {
-                            viewModel.setGlassRimIntensity(it / 100f)
-                        }
+                            defaultValue = 85f,
+                            onValueChange = { viewModel.updateLiveOverride("glassRimIntensity", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassRimIntensity(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -442,10 +517,10 @@ fun SettingsScreen(
                             range = 0f..200f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 100f
-                        ) {
-                            viewModel.setGlassSpecularIntensity(it / 100f)
-                        }
+                            defaultValue = 100f,
+                            onValueChange = { viewModel.updateLiveOverride("glassSpecularIntensity", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassSpecularIntensity(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -455,10 +530,10 @@ fun SettingsScreen(
                             range = 1f..128f,
                             unit = "normalized",
                             backdrop = backdrop,
-                            defaultValue = 56f
-                        ) {
-                            viewModel.setGlassShininess(it)
-                        }
+                            defaultValue = 56f,
+                            onValueChange = { viewModel.updateLiveOverride("glassShininess", it) },
+                            onValueChangeFinished = { viewModel.setGlassShininess(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -468,10 +543,10 @@ fun SettingsScreen(
                             range = 0f..2f,
                             unit = "normalized",
                             backdrop = backdrop,
-                            defaultValue = 0.9f
-                        ) {
-                            viewModel.setGlassDisplacementScale(it)
-                        }
+                            defaultValue = 0.9f,
+                            onValueChange = { viewModel.updateLiveOverride("glassDisplacementScale", it) },
+                            onValueChangeFinished = { viewModel.setGlassDisplacementScale(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -481,10 +556,10 @@ fun SettingsScreen(
                             range = 0f..10f,
                             unit = "normalized",
                             backdrop = backdrop,
-                            defaultValue = 1.8f
-                        ) {
-                            viewModel.setGlassMinSmoothing(it)
-                        }
+                            defaultValue = 1.8f,
+                            onValueChange = { viewModel.updateLiveOverride("glassMinSmoothing", it) },
+                            onValueChangeFinished = { viewModel.setGlassMinSmoothing(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -494,10 +569,10 @@ fun SettingsScreen(
                             range = 0f..20f,
                             unit = "normalized",
                             backdrop = backdrop,
-                            defaultValue = 3.5f
-                        ) {
-                            viewModel.setGlassHighlightWidth(it)
-                        }
+                            defaultValue = 3.5f,
+                            onValueChange = { viewModel.updateLiveOverride("glassHighlightWidth", it) },
+                            onValueChangeFinished = { viewModel.setGlassHighlightWidth(it) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -507,10 +582,10 @@ fun SettingsScreen(
                             range = 0f..200f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 10f
-                        ) {
-                            viewModel.setGlassCausticIntensity(it / 100f)
-                        }
+                            defaultValue = 10f,
+                            onValueChange = { viewModel.updateLiveOverride("glassCausticIntensity", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassCausticIntensity(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -520,10 +595,10 @@ fun SettingsScreen(
                             range = 0f..200f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 70f
-                        ) {
-                            viewModel.setGlassLiquidDome(it / 100f)
-                        }
+                            defaultValue = 70f,
+                            onValueChange = { viewModel.updateLiveOverride("glassLiquidDome", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassLiquidDome(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -533,10 +608,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 100f
-                        ) {
-                            viewModel.setGlassTransmittance(it / 100f)
-                        }
+                            defaultValue = 100f,
+                            onValueChange = { viewModel.updateLiveOverride("glassTransmittance", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassTransmittance(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -546,10 +621,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 18f
-                        ) {
-                            viewModel.setGlassShadowIntensity(it / 100f)
-                        }
+                            defaultValue = 18f,
+                            onValueChange = { viewModel.updateLiveOverride("glassShadowIntensity", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassShadowIntensity(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -559,12 +634,13 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = 20f
-                        ) {
-                            viewModel.setGlassShadowSoftness(it / 100f)
-                        }
+                            defaultValue = 20f,
+                            onValueChange = { viewModel.updateLiveOverride("glassShadowSoftness", it / 100f) },
+                            onValueChangeFinished = { viewModel.setGlassShadowSoftness(it / 100f) }
+                        )
                     }
                 }
+            }
             }
 
             // PREFERENCES SECTION
@@ -596,10 +672,10 @@ fun SettingsScreen(
                             range = 0f..100f,
                             unit = "%",
                             backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_HAPTIC_INTENSITY * 100f
-                        ) {
-                            viewModel.setHapticIntensity(it / 100f)
-                        }
+                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_HAPTIC_INTENSITY * 100f,
+                            onValueChange = { viewModel.updateLiveOverride("hapticIntensity", it / 100f) },
+                            onValueChangeFinished = { viewModel.setHapticIntensity(it / 100f) }
+                        )
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -651,72 +727,141 @@ fun SettingsScreen(
                 }
             }
 
-            // DOCK SETTINGS SECTION
-            item(key = "header_dock_settings") { SettingsSectionHeader("Dock Settings") }
-            item(key = "card_dock_settings") {
+            // UPDATES SECTION
+            item(key = "header_updates") { SettingsSectionHeader("Updates") }
+            item(key = "card_updates") {
                 LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
                     Column {
-                        GlassEffectSlider(
-                            title = "Corner Radius",
-                            value = prefs.dockCornerRadius,
-                            range = 0f..100f,
-                            unit = "dp",
-                            backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_CORNER_RADIUS
+                        val lastCheckedText = if (prefs.lastUpdateCheckTimestamp > 0) {
+                            val sdf = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
+                            "Last checked: " + sdf.format(Date(prefs.lastUpdateCheckTimestamp))
+                        } else {
+                            "Not checked yet"
+                        }
+
+                        val checkingSubtitle = when (updateState) {
+                            is UpdateState.Checking -> "Checking for updates..."
+                            is UpdateState.UpToDate -> "You're up to date · $lastCheckedText"
+                            is UpdateState.UpdateAvailable -> "Update available! · $lastCheckedText"
+                            is UpdateState.Downloading -> "Downloading update..."
+                            else -> lastCheckedText
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            viewModel.setDockCornerRadius(it)
+                            Row(
+                                modifier = Modifier.weight(1f),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                if (updateState is UpdateState.Checking) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.5.dp, color = adaptiveColor)
+                                } else {
+                                    Icon(Icons.Outlined.SystemUpdate, null, tint = adaptiveColor, modifier = Modifier.size(24.dp))
+                                }
+                                Column {
+                                    Text("Check for Updates", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = adaptiveColor)
+                                    Text(checkingSubtitle, style = MaterialTheme.typography.bodySmall, color = adaptiveColor.copy(alpha = 0.6f))
+                                }
+                            }
+                            LiquidButton(
+                                onClick = { viewModel.checkForUpdates() },
+                                backdrop = backdrop,
+                                surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                            ) {
+                                Text(
+                                    if (updateState is UpdateState.Checking) "Checking..." else "Check Now",
+                                    color = adaptiveColor,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.sp
+                                )
+                            }
                         }
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
-                        GlassEffectSlider(
-                            title = "Blur Radius",
-                            value = prefs.dockBlurRadius,
-                            range = 0f..100f,
-                            unit = "dp",
-                            backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_BLUR_RADIUS
-                        ) {
-                            viewModel.setDockBlurRadius(it)
-                        }
+                        SettingsNavigationItem(
+                            title = "Automatic Update Checks",
+                            value = prefs.updateCheckFrequency.displayName,
+                            icon = Icons.Outlined.Update
+                        ) { showFrequencyDialog = true }
+                    }
+                }
+            }
 
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
+            // DOCK SETTINGS SECTION
+            if (prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.LIQUID) {
+                item(key = "header_dock_settings") { SettingsSectionHeader("Dock Settings") }
+                item(key = "card_dock_settings") {
+                    LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
+                        Column {
+                            GlassEffectSlider(
+                                title = "Corner Radius",
+                                value = prefs.dockCornerRadius,
+                                range = 0f..100f,
+                                unit = "dp",
+                                backdrop = backdrop,
+                                defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_CORNER_RADIUS,
+                                onValueChange = { viewModel.updateLiveOverride("dockCornerRadius", it) },
+                                onValueChangeFinished = { viewModel.setDockCornerRadius(it) }
+                            )
 
-                        GlassEffectSlider(
-                            title = "Refraction Height",
-                            value = prefs.dockRefractionHeight,
-                            range = 0f..100f,
-                            unit = "dp",
-                            backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_REFRACTION_HEIGHT
-                        ) {
-                            viewModel.setDockRefractionHeight(it)
-                        }
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
+                            GlassEffectSlider(
+                                title = "Blur Radius",
+                                value = prefs.dockBlurRadius,
+                                range = 0f..100f,
+                                unit = "dp",
+                                backdrop = backdrop,
+                                defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_BLUR_RADIUS,
+                                onValueChange = { viewModel.updateLiveOverride("dockBlurRadius", it) },
+                                onValueChangeFinished = { viewModel.setDockBlurRadius(it) }
+                            )
 
-                        GlassEffectSlider(
-                            title = "Refraction Amount",
-                            value = prefs.dockRefractionAmount,
-                            range = 0f..100f,
-                            unit = "dp",
-                            backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_REFRACTION_AMOUNT
-                        ) {
-                            viewModel.setDockRefractionAmount(it)
-                        }
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
+                            GlassEffectSlider(
+                                title = "Refraction Height",
+                                value = prefs.dockRefractionHeight,
+                                range = 0f..100f,
+                                unit = "dp",
+                                backdrop = backdrop,
+                                defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_REFRACTION_HEIGHT,
+                                onValueChange = { viewModel.updateLiveOverride("dockRefractionHeight", it) },
+                                onValueChangeFinished = { viewModel.setDockRefractionHeight(it) }
+                            )
 
-                        GlassEffectSlider(
-                            title = "Chromatic Aberration",
-                            value = prefs.dockChromaticAberration,
-                            range = 0f..1f,
-                            unit = "normalized",
-                            backdrop = backdrop,
-                            defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_CHROMATIC_ABERRATION
-                        ) {
-                            viewModel.setDockChromaticAberration(it)
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
+
+                            GlassEffectSlider(
+                                title = "Refraction Amount",
+                                value = prefs.dockRefractionAmount,
+                                range = 0f..100f,
+                                unit = "dp",
+                                backdrop = backdrop,
+                                defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_REFRACTION_AMOUNT,
+                                onValueChange = { viewModel.updateLiveOverride("dockRefractionAmount", it) },
+                                onValueChangeFinished = { viewModel.setDockRefractionAmount(it) }
+                            )
+
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
+
+                            GlassEffectSlider(
+                                title = "Chromatic Aberration",
+                                value = prefs.dockChromaticAberration,
+                                range = 0f..1f,
+                                unit = "normalized",
+                                backdrop = backdrop,
+                                defaultValue = UserPreferencesRepository.Defaults.DEFAULT_DOCK_CHROMATIC_ABERRATION,
+                                onValueChange = { viewModel.updateLiveOverride("dockChromaticAberration", it) },
+                                onValueChangeFinished = { viewModel.setDockChromaticAberration(it) }
+                            )
                         }
                     }
                 }
@@ -824,6 +969,7 @@ fun SettingsScreen(
 
             item { Spacer(modifier = Modifier.height(100.dp)) }
         }
+    }
     }
 
     // Theme Mode Dialog
@@ -1099,6 +1245,192 @@ fun SettingsScreen(
             }
         )
     }
+
+    // UPDATE FREQUENCY DIALOG
+    if (showFrequencyDialog) {
+        LiquidDialog(
+            onDismissRequest = { showFrequencyDialog = false },
+            backdrop = backdrop,
+            title = "Automatic Update Checks",
+            positiveText = "Done",
+            negativeText = null,
+            onPositive = { showFrequencyDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                UpdateFrequency.entries.forEach { freq ->
+                    val isSelected = prefs.updateCheckFrequency == freq
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isSelected) adaptiveColor.copy(alpha = 0.1f) else Color.Transparent)
+                            .clickable {
+                                viewModel.setUpdateCheckFrequency(freq, context)
+                                showFrequencyDialog = false
+                            }
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(freq.displayName, color = adaptiveColor, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
+                            val desc = when (freq) {
+                                UpdateFrequency.OFF -> "Never check automatically"
+                                UpdateFrequency.DAILY -> "Check once every 24 hours (Recommended)"
+                                UpdateFrequency.WEEKLY -> "Check once every 7 days"
+                                UpdateFrequency.MONTHLY -> "Check once every 30 days"
+                            }
+                            Text(desc, style = MaterialTheme.typography.bodySmall, color = adaptiveColor.copy(alpha = 0.6f))
+                        }
+                        if (isSelected) Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
+        }
+    }
+
+    // UPDATE LIFECYCLE DIALOGS (LIQUID STYLED)
+    when (val state = updateState) {
+        is UpdateState.UpToDate -> {
+            LiquidDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                backdrop = backdrop,
+                title = "You're up to date",
+                message = "Turnly v${state.currentVersion} is the latest version available.",
+                positiveText = "OK",
+                negativeText = null,
+                icon = Icons.Outlined.CheckCircle,
+                onPositive = { viewModel.dismissUpdateDialog() }
+            )
+        }
+        is UpdateState.UpdateAvailable -> {
+            LiquidDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                backdrop = backdrop,
+                title = "Update Available",
+                icon = Icons.Outlined.NewReleases,
+                positiveText = "Download Update",
+                negativeText = "Later",
+                onPositive = { viewModel.startDownload(state.updateInfo) }
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Turnly v${state.updateInfo.versionName} is ready to download.",
+                        fontWeight = FontWeight.Bold,
+                        color = adaptiveColor
+                    )
+                    if (state.updateInfo.assetSize > 0) {
+                        val mb = state.updateInfo.assetSize / (1024f * 1024f)
+                        Text(
+                            text = String.format(Locale.ROOT, "Download size: %.1f MB", mb),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = adaptiveColor.copy(alpha = 0.7f)
+                        )
+                    }
+                    HorizontalDivider(color = adaptiveColor.copy(alpha = 0.08f))
+                    Text("What's New", fontWeight = FontWeight.SemiBold, color = adaptiveColor)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 160.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(adaptiveColor.copy(alpha = 0.06f))
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = state.updateInfo.releaseNotes.ifBlank { "No release notes provided." },
+                            style = MaterialTheme.typography.bodySmall,
+                            color = adaptiveColor
+                        )
+                    }
+                }
+            }
+        }
+        is UpdateState.Downloading -> {
+            LiquidDialog(
+                onDismissRequest = { /* Require explicit cancel */ },
+                backdrop = backdrop,
+                title = "Downloading Update",
+                icon = Icons.Outlined.CloudDownload,
+                positiveText = "Cancel",
+                negativeText = null,
+                onPositive = { viewModel.cancelDownload() }
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    LinearProgressIndicator(
+                        progress = { state.progress },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        val percent = (state.progress * 100).toInt()
+                        Text("$percent%", fontWeight = FontWeight.Bold, color = adaptiveColor)
+                        if (state.totalBytes > 0) {
+                            val currentMb = state.downloadedBytes / (1024f * 1024f)
+                            val totalMb = state.totalBytes / (1024f * 1024f)
+                            Text(
+                                String.format(Locale.ROOT, "%.1f / %.1f MB", currentMb, totalMb),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = adaptiveColor.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        is UpdateState.WaitingForInstallPermission -> {
+            LiquidDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                backdrop = backdrop,
+                title = "Install Permission Required",
+                icon = Icons.Outlined.Security,
+                message = "Turnly downloaded the update, but Android requires you to allow Turnly to install applications from this source.\n\nEnable 'Allow from this source' for Turnly to continue the update.",
+                positiveText = "Open Settings",
+                negativeText = "Cancel",
+                onPositive = {
+                    val intent = viewModel.createManageUnknownAppSourcesIntent()
+                    if (intent != null) {
+                        try {
+                            context.startActivity(intent)
+                        } catch (_: Exception) {}
+                    }
+                }
+            )
+        }
+        is UpdateState.ReadyToInstall -> {
+            LiquidDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                backdrop = backdrop,
+                title = "Update Downloaded",
+                icon = Icons.Outlined.InstallMobile,
+                message = "Turnly v${state.updateInfo.versionName} is downloaded and verified. Ready to install.",
+                positiveText = "Install Now",
+                negativeText = "Later",
+                onPositive = { viewModel.installUpdate(state.apkFile, state.updateInfo) }
+            )
+        }
+        is UpdateState.Error -> {
+            LiquidDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                backdrop = backdrop,
+                title = "Update Failed",
+                icon = Icons.Outlined.ErrorOutline,
+                message = state.message,
+                positiveText = if (state.canRetry) "Retry" else "OK",
+                negativeText = if (state.canRetry) "Dismiss" else null,
+                onPositive = {
+                    if (state.canRetry) {
+                        viewModel.checkForUpdates()
+                    } else {
+                        viewModel.dismissUpdateDialog()
+                    }
+                }
+            )
+        }
+        else -> Unit
+    }
 }
 
 @Composable
@@ -1183,6 +1515,7 @@ fun GlassEffectSlider(
     unit: String,
     backdrop: Backdrop,
     defaultValue: Float? = null,
+    onValueChangeFinished: ((Float) -> Unit)? = null,
     onValueChange: (Float) -> Unit
 ) {
     val adaptiveColor = LocalPrismalAdaptiveColor.current
@@ -1203,7 +1536,10 @@ fun GlassEffectSlider(
                         contentDescription = "Reset",
                         modifier = Modifier
                             .size(16.dp)
-                            .clickable { onValueChange(defaultValue) },
+                            .clickable {
+                                onValueChange(defaultValue)
+                                onValueChangeFinished?.invoke(defaultValue)
+                            },
                         tint = adaptiveColor.copy(alpha = 0.5f)
                     )
                 }
@@ -1220,6 +1556,7 @@ fun GlassEffectSlider(
         LiquidSlider(
             value = { value },
             onValueChange = onValueChange,
+            onValueChangeFinished = onValueChangeFinished,
             valueRange = range,
             visibilityThreshold = if (unit == "normalized") 0.01f else 1f,
             backdrop = backdrop

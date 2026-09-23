@@ -244,7 +244,7 @@ fun Material3App(
 
                         composable(Screen.Settings.route) {
                             val settingsViewModel: SettingsViewModel = viewModel {
-                                SettingsViewModel(app.userPreferencesRepository, app.repository)
+                                SettingsViewModel(app.userPreferencesRepository, app.repository, app.updateManager)
                             }
                             M3SettingsScreen(viewModel = settingsViewModel)
                         }

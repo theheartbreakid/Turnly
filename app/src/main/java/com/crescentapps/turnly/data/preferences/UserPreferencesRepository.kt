@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.crescentapps.turnly.core.model.FirstDayOfWeek
 import com.crescentapps.turnly.core.model.ThemeMode
 import com.crescentapps.turnly.core.model.UiMode
+import com.crescentapps.turnly.core.model.UpdateFrequency
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -89,7 +90,11 @@ data class UserPreferences(
     val userDisplayName: String = "User",
     val deviceMemberId: String = "",
     val syncOverMobileData: Boolean = true,
-    val onlineSyncEnabled: Boolean = true
+    val onlineSyncEnabled: Boolean = true,
+
+    // App Updates
+    val updateCheckFrequency: UpdateFrequency = UpdateFrequency.DAILY,
+    val lastUpdateCheckTimestamp: Long = 0L
 )
 
 class UserPreferencesRepository(private val context: Context) {
@@ -198,6 +203,8 @@ class UserPreferencesRepository(private val context: Context) {
         val DEVICE_MEMBER_ID = stringPreferencesKey("device_member_id")
         val SYNC_OVER_MOBILE = booleanPreferencesKey("sync_over_mobile")
         val ONLINE_SYNC_ENABLED = booleanPreferencesKey("online_sync_enabled")
+        val UPDATE_CHECK_FREQUENCY = stringPreferencesKey("update_check_frequency")
+        val LAST_UPDATE_CHECK_TIMESTAMP = longPreferencesKey("last_update_check_timestamp")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = context.dataStore.data.map { preferences ->
@@ -279,7 +286,11 @@ class UserPreferencesRepository(private val context: Context) {
             userDisplayName = preferences[PreferencesKeys.USER_DISPLAY_NAME] ?: "User",
             deviceMemberId = memberId,
             syncOverMobileData = preferences[PreferencesKeys.SYNC_OVER_MOBILE] ?: true,
-            onlineSyncEnabled = preferences[PreferencesKeys.ONLINE_SYNC_ENABLED] ?: true
+            onlineSyncEnabled = preferences[PreferencesKeys.ONLINE_SYNC_ENABLED] ?: true,
+            updateCheckFrequency = runCatching {
+                UpdateFrequency.valueOf(preferences[PreferencesKeys.UPDATE_CHECK_FREQUENCY] ?: UpdateFrequency.DAILY.name)
+            }.getOrDefault(UpdateFrequency.DAILY),
+            lastUpdateCheckTimestamp = preferences[PreferencesKeys.LAST_UPDATE_CHECK_TIMESTAMP] ?: 0L
         )
     }
 
@@ -565,6 +576,16 @@ class UserPreferencesRepository(private val context: Context) {
             it.remove(PreferencesKeys.FIRST_DAY_OF_WEEK)
             it.remove(PreferencesKeys.SYNC_OVER_MOBILE)
             it.remove(PreferencesKeys.ONLINE_SYNC_ENABLED)
+            it.remove(PreferencesKeys.UPDATE_CHECK_FREQUENCY)
+            it.remove(PreferencesKeys.LAST_UPDATE_CHECK_TIMESTAMP)
         }
+    }
+
+    suspend fun setUpdateCheckFrequency(frequency: UpdateFrequency) {
+        context.dataStore.edit { it[PreferencesKeys.UPDATE_CHECK_FREQUENCY] = frequency.name }
+    }
+
+    suspend fun setLastUpdateCheckTimestamp(timestamp: Long) {
+        context.dataStore.edit { it[PreferencesKeys.LAST_UPDATE_CHECK_TIMESTAMP] = timestamp }
     }
 }

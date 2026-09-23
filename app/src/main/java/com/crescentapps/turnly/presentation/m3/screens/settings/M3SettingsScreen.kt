@@ -20,8 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.crescentapps.turnly.core.model.FirstDayOfWeek
 import com.crescentapps.turnly.core.model.ThemeMode
 import com.crescentapps.turnly.core.model.UiMode
+import com.crescentapps.turnly.core.model.UpdateFrequency
+import com.crescentapps.turnly.core.update.model.UpdateState
 import com.crescentapps.turnly.presentation.m3.components.M3ConfirmDialog
 import com.crescentapps.turnly.presentation.screens.settings.SettingsViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 /**
@@ -47,6 +51,9 @@ fun M3SettingsScreen(
     var showFirstDayDialog by remember { mutableStateOf(false) }
     var showResetDataDialog by remember { mutableStateOf(false) }
     var showLiquidWarningDialog by remember { mutableStateOf(false) }
+    var showFrequencyDialog by remember { mutableStateOf(false) }
+
+    val updateState by viewModel.updateState.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -267,6 +274,58 @@ fun M3SettingsScreen(
                 }
             }
 
+            // UPDATES SECTION
+            item(key = "m3_header_updates") { M3SectionHeader("Updates") }
+            item(key = "m3_card_updates") {
+                ElevatedCard(shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+                    Column {
+                        val lastCheckedText = if (prefs.lastUpdateCheckTimestamp > 0) {
+                            val sdf = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
+                            "Last checked: " + sdf.format(Date(prefs.lastUpdateCheckTimestamp))
+                        } else {
+                            "Not checked yet"
+                        }
+
+                        val checkingSubtitle = when (updateState) {
+                            is UpdateState.Checking -> "Checking for updates..."
+                            is UpdateState.UpToDate -> "You're up to date · $lastCheckedText"
+                            is UpdateState.UpdateAvailable -> "Update available! · $lastCheckedText"
+                            is UpdateState.Downloading -> "Downloading update..."
+                            else -> lastCheckedText
+                        }
+
+                        ListItem(
+                            headlineContent = { Text("Check for Updates", fontWeight = FontWeight.SemiBold) },
+                            supportingContent = { Text(checkingSubtitle) },
+                            leadingContent = {
+                                if (updateState is UpdateState.Checking) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.5.dp)
+                                } else {
+                                    Icon(Icons.Outlined.SystemUpdate, contentDescription = null)
+                                }
+                            },
+                            trailingContent = {
+                                Button(
+                                    onClick = { viewModel.checkForUpdates() },
+                                    enabled = updateState !is UpdateState.Checking && updateState !is UpdateState.Downloading
+                                ) {
+                                    Text(if (updateState is UpdateState.Checking) "Checking..." else "Check Now")
+                                }
+                            }
+                        )
+
+                        HorizontalDivider()
+
+                        M3SettingsNavigationItem(
+                            title = "Automatic Update Checks",
+                            value = prefs.updateCheckFrequency.displayName,
+                            icon = Icons.Outlined.Update,
+                            onClick = { showFrequencyDialog = true }
+                        )
+                    }
+                }
+            }
+
             // DATA & MANAGEMENT SECTION
             item(key = "m3_header_data") { M3SectionHeader("Data & Management") }
             item(key = "m3_card_data") {
@@ -419,6 +478,227 @@ fun M3SettingsScreen(
             },
             onDismiss = { showResetDataDialog = false }
         )
+    }
+
+    // UPDATE FREQUENCY DIALOG
+    if (showFrequencyDialog) {
+        AlertDialog(
+            onDismissRequest = { showFrequencyDialog = false },
+            title = { Text("Automatic Update Checks", fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    UpdateFrequency.entries.forEach { freq ->
+                        val isSelected = prefs.updateCheckFrequency == freq
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.setUpdateCheckFrequency(freq, context)
+                                    showFrequencyDialog = false
+                                }
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            RadioButton(
+                                selected = isSelected,
+                                onClick = {
+                                    viewModel.setUpdateCheckFrequency(freq, context)
+                                    showFrequencyDialog = false
+                                }
+                            )
+                            Column {
+                                Text(freq.displayName, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal)
+                                val desc = when (freq) {
+                                    UpdateFrequency.OFF -> "Never check automatically"
+                                    UpdateFrequency.DAILY -> "Check once every 24 hours (Recommended)"
+                                    UpdateFrequency.WEEKLY -> "Check once every 7 days"
+                                    UpdateFrequency.MONTHLY -> "Check once every 30 days"
+                                }
+                                Text(desc, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showFrequencyDialog = false }) { Text("Close") }
+            }
+        )
+    }
+
+    // UPDATE LIFECYCLE MODALS
+    when (val state = updateState) {
+        is UpdateState.UpToDate -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                icon = { Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                title = { Text("You're up to date") },
+                text = { Text("Turnly v${state.currentVersion} is the latest version available.") },
+                confirmButton = {
+                    Button(onClick = { viewModel.dismissUpdateDialog() }) { Text("OK") }
+                }
+            )
+        }
+        is UpdateState.UpdateAvailable -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                icon = { Icon(Icons.Outlined.NewReleases, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                title = { Text("Update Available") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = "Turnly v${state.updateInfo.versionName} is now available.",
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (state.updateInfo.assetSize > 0) {
+                            val mb = state.updateInfo.assetSize / (1024f * 1024f)
+                            Text(
+                                text = String.format(Locale.ROOT, "Download size: %.1f MB", mb),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        HorizontalDivider()
+                        Text("What's New", fontWeight = FontWeight.SemiBold)
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 180.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+                        ) {
+                            Box(modifier = Modifier.padding(12.dp)) {
+                                Text(
+                                    text = state.updateInfo.releaseNotes.ifBlank { "No release notes provided." },
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = { viewModel.startDownload(state.updateInfo) }) {
+                        Text("Download Update")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissUpdateDialog() }) {
+                        Text("Later")
+                    }
+                }
+            )
+        }
+        is UpdateState.Downloading -> {
+            AlertDialog(
+                onDismissRequest = { /* Prevent dismiss during download without explicit cancel */ },
+                icon = { Icon(Icons.Outlined.CloudDownload, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                title = { Text("Downloading Update") },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        LinearProgressIndicator(
+                            progress = { state.progress },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            val percent = (state.progress * 100).toInt()
+                            Text("$percent%", fontWeight = FontWeight.Bold)
+                            if (state.totalBytes > 0) {
+                                val currentMb = state.downloadedBytes / (1024f * 1024f)
+                                val totalMb = state.totalBytes / (1024f * 1024f)
+                                Text(
+                                    String.format(Locale.ROOT, "%.1f / %.1f MB", currentMb, totalMb),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.cancelDownload() }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+        is UpdateState.WaitingForInstallPermission -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                icon = { Icon(Icons.Outlined.Security, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                title = { Text("Install Permission Required") },
+                text = {
+                    Text(
+                        "Turnly downloaded the update, but Android requires you to allow Turnly to install applications from this source.\n\nEnable 'Allow from this source' for Turnly to continue the update."
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            val intent = viewModel.createManageUnknownAppSourcesIntent()
+                            if (intent != null) {
+                                try {
+                                    context.startActivity(intent)
+                                } catch (_: Exception) {}
+                            }
+                        }
+                    ) {
+                        Text("Open Settings")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissUpdateDialog() }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+        is UpdateState.ReadyToInstall -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                icon = { Icon(Icons.Outlined.InstallMobile, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                title = { Text("Update Downloaded") },
+                text = { Text("Turnly v${state.updateInfo.versionName} is ready to install.") },
+                confirmButton = {
+                    Button(onClick = { viewModel.installUpdate(state.apkFile, state.updateInfo) }) {
+                        Text("Install Now")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.dismissUpdateDialog() }) {
+                        Text("Later")
+                    }
+                }
+            )
+        }
+        is UpdateState.Error -> {
+            AlertDialog(
+                onDismissRequest = { viewModel.dismissUpdateDialog() },
+                icon = { Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+                title = { Text("Update Failed") },
+                text = { Text(state.message) },
+                confirmButton = {
+                    if (state.canRetry) {
+                        Button(onClick = { viewModel.checkForUpdates() }) {
+                            Text("Retry")
+                        }
+                    } else {
+                        Button(onClick = { viewModel.dismissUpdateDialog() }) {
+                            Text("OK")
+                        }
+                    }
+                },
+                dismissButton = if (state.canRetry) {
+                    {
+                        TextButton(onClick = { viewModel.dismissUpdateDialog() }) {
+                            Text("Dismiss")
+                        }
+                    }
+                } else null
+            )
+        }
+        else -> Unit
     }
 }
 

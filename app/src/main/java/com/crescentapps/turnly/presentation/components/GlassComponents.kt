@@ -58,6 +58,7 @@ val LocalPrismalSceneVersion = compositionLocalOf { 0L }
 val LocalAdaptiveLuminanceActive = compositionLocalOf { false }
 val LocalAdaptiveLuminanceEnabled = compositionLocalOf { true }
 val LocalAdaptiveLuminanceInterval = compositionLocalOf { 1000 }
+val LocalScrollInProgress = compositionLocalOf { false }
 val LocalGlassIntensity = compositionLocalOf { 1.0f }
 val LocalHapticIntensity = compositionLocalOf { 1.0f }
 val LocalHapticEnabled = compositionLocalOf { true }
@@ -160,28 +161,32 @@ fun AdaptiveLuminanceProvider(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    LaunchedEffect(layer, globalEnabled, fallbackMode, paletteColor, customColor, sceneVersion, lastPosition, isAppVisible, isLightTheme, turnlyColors) {
+    val isScrollInProgress = LocalScrollInProgress.current
+
+    LaunchedEffect(layer, globalEnabled, fallbackMode, paletteColor, customColor, sceneVersion, lastPosition, isAppVisible, isLightTheme, turnlyColors, isScrollInProgress) {
         if (globalEnabled && layer != null && isAppVisible) {
             while (true) {
-                try {
-                    val imageBitmap = layer.toImageBitmap()
-                    val thumbnail = imageBitmap.scale(5, 5)
-                    thumbnail.readPixels(buffer)
+                if (!isScrollInProgress) {
+                    try {
+                        val imageBitmap = layer.toImageBitmap()
+                        val thumbnail = imageBitmap.scale(5, 5)
+                        thumbnail.readPixels(buffer)
 
-                    var luminanceSum = 0.0
-                    for (argb in buffer) {
-                        val r = (argb shr 16 and 0xFF) / 255f
-                        val g = (argb shr 8 and 0xFF) / 255f
-                        val b = (argb and 0xFF) / 255f
-                        luminanceSum += 0.2126 * r + 0.7152 * g + 0.0722 * b
+                        var luminanceSum = 0.0
+                        for (argb in buffer) {
+                            val r = (argb shr 16 and 0xFF) / 255f
+                            val g = (argb shr 8 and 0xFF) / 255f
+                            val b = (argb and 0xFF) / 255f
+                            luminanceSum += 0.2126 * r + 0.7152 * g + 0.0722 * b
+                        }
+                        val averageLuminance = (luminanceSum / buffer.size).toFloat()
+                        val targetColor = if (averageLuminance > 0.45f) Color.Black else Color.White
+                        if (contentColorAnimation.targetValue != targetColor) {
+                            contentColorAnimation.animateTo(targetColor, tween(300, easing = LinearOutSlowInEasing))
+                        }
+                    } catch (e: Exception) {
+                        // Layer not yet drawn/ready; retain current contrast-safe color
                     }
-                    val averageLuminance = (luminanceSum / buffer.size).toFloat()
-                    val targetColor = if (averageLuminance > 0.45f) Color.Black else Color.White
-                    if (contentColorAnimation.targetValue != targetColor) {
-                        contentColorAnimation.animateTo(targetColor, tween(300, easing = LinearOutSlowInEasing))
-                    }
-                } catch (e: Exception) {
-                    // Layer not yet drawn/ready; retain current contrast-safe color
                 }
                 delay(refreshInterval.toLong())
             }
@@ -189,27 +194,29 @@ fun AdaptiveLuminanceProvider(
             // FALLBACK PATH (Adaptive Luminance OFF)
             if (fallbackMode == 0 && layer != null) { // AUTO
                 while (true) {
-                    try {
-                        val imageBitmap = layer.toImageBitmap()
-                        val thumbnail = imageBitmap.scale(5, 5)
-                        thumbnail.readPixels(buffer)
+                    if (!isScrollInProgress) {
+                        try {
+                            val imageBitmap = layer.toImageBitmap()
+                            val thumbnail = imageBitmap.scale(5, 5)
+                            thumbnail.readPixels(buffer)
 
-                        var rSum = 0f; var gSum = 0f; var bSum = 0f
-                        buffer.forEach { argb ->
-                            rSum += (argb shr 16 and 0xFF) / 255f
-                            gSum += (argb shr 8 and 0xFF) / 255f
-                            bSum += (argb and 0xFF) / 255f
-                        }
-                        val avgColor = Color(rSum / 25, gSum / 25, bSum / 25)
-                        val avgLuminance = 0.2126f * (rSum / 25) + 0.7152f * (gSum / 25) + 0.0722f * (bSum / 25)
-                        val result = deriveReadableColor(avgColor, avgLuminance)
-                        if (contentColorAnimation.targetValue != result) {
-                            contentColorAnimation.animateTo(result, tween(300))
-                        }
-                    } catch (e: Exception) {
-                        val defaultColor = turnlyColors.resolveForeground(turnlyColors.surface)
-                        if (contentColorAnimation.targetValue != defaultColor) {
-                            contentColorAnimation.animateTo(defaultColor, tween(200))
+                            var rSum = 0f; var gSum = 0f; var bSum = 0f
+                            buffer.forEach { argb ->
+                                rSum += (argb shr 16 and 0xFF) / 255f
+                                gSum += (argb shr 8 and 0xFF) / 255f
+                                bSum += (argb and 0xFF) / 255f
+                            }
+                            val avgColor = Color(rSum / 25, gSum / 25, bSum / 25)
+                            val avgLuminance = 0.2126f * (rSum / 25) + 0.7152f * (gSum / 25) + 0.0722f * (bSum / 25)
+                            val result = deriveReadableColor(avgColor, avgLuminance)
+                            if (contentColorAnimation.targetValue != result) {
+                                contentColorAnimation.animateTo(result, tween(300))
+                            }
+                        } catch (e: Exception) {
+                            val defaultColor = turnlyColors.resolveForeground(turnlyColors.surface)
+                            if (contentColorAnimation.targetValue != defaultColor) {
+                                contentColorAnimation.animateTo(defaultColor, tween(200))
+                            }
                         }
                     }
                     delay(refreshInterval.toLong().coerceAtLeast(300L))
@@ -218,19 +225,21 @@ fun AdaptiveLuminanceProvider(
                 val baseColor = if (fallbackMode == 1) Color(paletteColor) else Color(customColor)
                 if (layer != null) {
                     while (true) {
-                        try {
-                            val imageBitmap = layer.toImageBitmap()
-                            val thumbnail = imageBitmap.scale(1, 1)
-                            thumbnail.readPixels(buffer)
-                            val argb = buffer[0]
-                            val bgLuminance = (0.2126f * (argb shr 16 and 0xFF) + 0.7152f * (argb shr 8 and 0xFF) + 0.0722f * (argb and 0xFF)) / 255f
-                            val contrastColor = ensureContrast(baseColor, bgLuminance)
-                            if (contentColorAnimation.targetValue != contrastColor) {
-                                contentColorAnimation.animateTo(contrastColor, tween(200))
-                            }
-                        } catch (e: Exception) {
-                            if (contentColorAnimation.targetValue != baseColor) {
-                                contentColorAnimation.animateTo(baseColor, tween(200))
+                        if (!isScrollInProgress) {
+                            try {
+                                val imageBitmap = layer.toImageBitmap()
+                                val thumbnail = imageBitmap.scale(1, 1)
+                                thumbnail.readPixels(buffer)
+                                val argb = buffer[0]
+                                val bgLuminance = (0.2126f * (argb shr 16 and 0xFF) + 0.7152f * (argb shr 8 and 0xFF) + 0.0722f * (argb and 0xFF)) / 255f
+                                val contrastColor = ensureContrast(baseColor, bgLuminance)
+                                if (contentColorAnimation.targetValue != contrastColor) {
+                                    contentColorAnimation.animateTo(contrastColor, tween(200))
+                                }
+                            } catch (e: Exception) {
+                                if (contentColorAnimation.targetValue != baseColor) {
+                                    contentColorAnimation.animateTo(baseColor, tween(200))
+                                }
                             }
                         }
                         delay(refreshInterval.toLong().coerceAtLeast(300L))
@@ -316,7 +325,38 @@ data class GlassSettings(
     val shadowIntensity: Float = 0.18f,
     val shadowSoftness: Float = 0.2f,
     val captureDownsample: String = "balanced"
-)
+) {
+    companion object {
+        fun fromPreferences(prefs: com.crescentapps.turnly.data.preferences.UserPreferences): GlassSettings {
+            return GlassSettings(
+                blurRadius = prefs.glassBlurRadius,
+                cornerRadius = prefs.glassCornerRadius,
+                refractionHeight = prefs.glassRefractionHeight,
+                refractionAmount = prefs.glassRefractionAmount,
+                chromaticAberration = prefs.glassChromaticAberration,
+                ior = prefs.glassIOR,
+                thickness = prefs.glassThickness,
+                normalStrength = prefs.glassNormalStrength,
+                brightness = prefs.glassBrightness,
+                rimIntensity = prefs.glassRimIntensity,
+                specularIntensity = prefs.glassSpecularIntensity,
+                shininess = prefs.glassShininess,
+                displacementScale = prefs.glassDisplacementScale,
+                minSmoothing = prefs.glassMinSmoothing,
+                highlightWidth = prefs.glassHighlightWidth,
+                causticIntensity = prefs.glassCausticIntensity,
+                liquidDome = prefs.glassLiquidDome,
+                transmittance = prefs.glassTransmittance,
+                lightDirX = prefs.glassLightDirX,
+                lightDirY = prefs.glassLightDirY,
+                shadowColor = prefs.glassShadowColor,
+                shadowIntensity = prefs.glassShadowIntensity,
+                shadowSoftness = prefs.glassShadowSoftness,
+                captureDownsample = prefs.glassCaptureDownsample
+            )
+        }
+    }
+}
 
 data class DockSettings(
     val blurRadius: Float = 8f,
@@ -495,6 +535,7 @@ fun PrismalCard(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(28.dp),
     tonalColor: Color? = null,
+    thickness: Float? = null,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
@@ -502,7 +543,7 @@ fun PrismalCard(
         modifier = modifier,
         shape = shape,
         tonalColor = tonalColor,
-        thickness = 18f,
+        thickness = thickness,
         onClick = onClick,
         content = content
     )

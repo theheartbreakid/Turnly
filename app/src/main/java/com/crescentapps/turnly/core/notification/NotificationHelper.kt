@@ -16,6 +16,7 @@ import com.crescentapps.turnly.core.util.CurrencyUtils
 
 object NotificationHelper {
     const val CHANNEL_DAILY_TURNS = "turnly_daily_turns"
+    const val CHANNEL_UPDATES = "turnly_updates"
     const val ACTION_MARK_DONE = "com.crescentapps.turnly.ACTION_MARK_DONE"
     const val EXTRA_SCHEDULE_ID = "extra_schedule_id"
     const val EXTRA_DATE = "extra_date"
@@ -24,16 +25,25 @@ object NotificationHelper {
 
     fun createNotificationChannels(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Daily Turns"
-            val descriptionText = "Reminders for scheduled daily rotations"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_DAILY_TURNS, name, importance).apply {
-                description = descriptionText
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+            val dailyName = "Daily Turns"
+            val dailyDesc = "Reminders for scheduled daily rotations"
+            val dailyChannel = NotificationChannel(CHANNEL_DAILY_TURNS, dailyName, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = dailyDesc
                 enableLights(true)
                 enableVibration(true)
             }
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(dailyChannel)
+
+            val updatesName = "App Updates"
+            val updatesDesc = "Notifications for new Turnly releases"
+            val updatesChannel = NotificationChannel(CHANNEL_UPDATES, updatesName, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = updatesDesc
+                enableLights(true)
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(updatesChannel)
         }
     }
 
@@ -97,6 +107,33 @@ object NotificationHelper {
 
         try {
             NotificationManagerCompat.from(context).notify(turn.schedule.id.toInt(), builder.build())
+        } catch (e: SecurityException) {
+            // Notification permission might not be granted yet
+        }
+    }
+
+    fun showUpdateAvailableNotification(context: Context, versionName: String, releaseNotes: String) {
+        val tapIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val tapPendingIntent = PendingIntent.getActivity(
+            context,
+            9999,
+            tapIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_UPDATES)
+            .setSmallIcon(android.R.drawable.stat_sys_download_done)
+            .setContentTitle("Turnly update available")
+            .setContentText("Version $versionName is available. Tap to view update.")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("Version $versionName is ready to download.\n\n$releaseNotes"))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setContentIntent(tapPendingIntent)
+            .setAutoCancel(true)
+
+        try {
+            NotificationManagerCompat.from(context).notify(9999, builder.build())
         } catch (e: SecurityException) {
             // Notification permission might not be granted yet
         }

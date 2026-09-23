@@ -56,7 +56,8 @@ fun LiquidSlider(
     valueRange: ClosedFloatingPointRange<Float>,
     visibilityThreshold: Float,
     backdrop: Backdrop,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onValueChangeFinished: ((Float) -> Unit)? = null
 ) {
     val haptic = com.crescentapps.turnly.presentation.components.rememberPrismalHaptic()
     val turnlyColors = LocalTurnlyColors.current
@@ -67,6 +68,7 @@ fun LiquidSlider(
 
     val trackBackdrop = rememberLayerBackdrop()
     val currentOnValueChange by rememberUpdatedState(onValueChange)
+    val currentOnValueChangeFinished by rememberUpdatedState(onValueChangeFinished)
     val currentValue by rememberUpdatedState(value)
 
     BoxWithConstraints(
@@ -108,11 +110,11 @@ fun LiquidSlider(
                 },
                 onDragStopped = {
                     isDragging = false
-                    if (didDrag) {
-                        currentOnValueChange(targetValue)
-                        haptic()
-                        didDrag = false
-                    }
+                    val finalVal = fraction
+                    currentOnValueChange(finalVal)
+                    currentOnValueChangeFinished?.invoke(finalVal)
+                    haptic()
+                    didDrag = false
                 },
                 onDrag = { _, dragAmount ->
                     if (!didDrag) {

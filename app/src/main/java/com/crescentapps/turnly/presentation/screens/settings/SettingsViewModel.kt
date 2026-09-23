@@ -22,11 +22,67 @@ import kotlinx.serialization.json.Json
  */
 class SettingsViewModel(
     private val preferencesRepository: UserPreferencesRepository,
-    private val repository: TurnlyRepository
+    private val repository: TurnlyRepository,
+    private val updateManager: com.crescentapps.turnly.core.update.UpdateManager? = null
 ) : ViewModel() {
+
+    val updateState: StateFlow<com.crescentapps.turnly.core.update.model.UpdateState> =
+        updateManager?.updateState ?: MutableStateFlow(com.crescentapps.turnly.core.update.model.UpdateState.Idle)
 
     val preferences: StateFlow<UserPreferences> = preferencesRepository.userPreferencesFlow
         .stateIn(viewModelScope, SharingStarted.Eagerly, UserPreferences())
+
+    // In-memory live parameter overrides for instantaneous slider updates without waiting for DataStore I/O
+    private val liveOverrides = MutableStateFlow<Map<String, Any>>(emptyMap())
+
+    val effectivePreferences: StateFlow<UserPreferences> = combine(preferences, liveOverrides) { prefs, overrides ->
+        if (overrides.isEmpty()) {
+            prefs
+        } else {
+            var updated = prefs
+            overrides.forEach { (key, value) ->
+                when (key) {
+                    "glassCornerRadius" -> updated = updated.copy(glassCornerRadius = value as Float)
+                    "glassBlurRadius" -> updated = updated.copy(glassBlurRadius = value as Float)
+                    "glassRefractionHeight" -> updated = updated.copy(glassRefractionHeight = value as Float)
+                    "glassRefractionAmount" -> updated = updated.copy(glassRefractionAmount = value as Float)
+                    "glassChromaticAberration" -> updated = updated.copy(glassChromaticAberration = value as Float)
+                    "glassIOR" -> updated = updated.copy(glassIOR = value as Float)
+                    "glassThickness" -> updated = updated.copy(glassThickness = value as Float)
+                    "glassNormalStrength" -> updated = updated.copy(glassNormalStrength = value as Float)
+                    "glassBrightness" -> updated = updated.copy(glassBrightness = value as Float)
+                    "glassRimIntensity" -> updated = updated.copy(glassRimIntensity = value as Float)
+                    "glassSpecularIntensity" -> updated = updated.copy(glassSpecularIntensity = value as Float)
+                    "glassShininess" -> updated = updated.copy(glassShininess = value as Float)
+                    "glassDisplacementScale" -> updated = updated.copy(glassDisplacementScale = value as Float)
+                    "glassMinSmoothing" -> updated = updated.copy(glassMinSmoothing = value as Float)
+                    "glassHighlightWidth" -> updated = updated.copy(glassHighlightWidth = value as Float)
+                    "glassCausticIntensity" -> updated = updated.copy(glassCausticIntensity = value as Float)
+                    "glassLiquidDome" -> updated = updated.copy(glassLiquidDome = value as Float)
+                    "glassTransmittance" -> updated = updated.copy(glassTransmittance = value as Float)
+                    "glassShadowIntensity" -> updated = updated.copy(glassShadowIntensity = value as Float)
+                    "glassShadowSoftness" -> updated = updated.copy(glassShadowSoftness = value as Float)
+                    "dockCornerRadius" -> updated = updated.copy(dockCornerRadius = value as Float)
+                    "dockBlurRadius" -> updated = updated.copy(dockBlurRadius = value as Float)
+                    "dockRefractionHeight" -> updated = updated.copy(dockRefractionHeight = value as Float)
+                    "dockRefractionAmount" -> updated = updated.copy(dockRefractionAmount = value as Float)
+                    "dockChromaticAberration" -> updated = updated.copy(dockChromaticAberration = value as Float)
+                    "glassIntensity" -> updated = updated.copy(glassIntensity = value as Float)
+                    "hapticIntensity" -> updated = updated.copy(hapticIntensity = value as Float)
+                    "adaptiveLuminanceInterval" -> updated = updated.copy(adaptiveLuminanceInterval = value as Int)
+                }
+            }
+            updated
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, UserPreferences())
+
+    fun updateLiveOverride(key: String, value: Any) {
+        liveOverrides.update { it + (key to value) }
+    }
+
+    private fun clearLiveOverride(key: String) {
+        liveOverrides.update { it - key }
+    }
 
     // UI Visual System Mode
     fun setUiMode(mode: UiMode) {
@@ -225,10 +281,12 @@ class SettingsViewModel(
 
     // Resets
     fun resetAppearanceSettings() {
+        liveOverrides.value = emptyMap()
         viewModelScope.launch { preferencesRepository.resetAppearanceSettings() }
     }
 
     fun resetAllPreferences() {
+        liveOverrides.value = emptyMap()
         viewModelScope.launch { preferencesRepository.resetAllSettings() }
     }
 
@@ -322,6 +380,45 @@ class SettingsViewModel(
     fun resetAllData() {
         viewModelScope.launch {
             repository.resetDatabase()
+        }
+    }
+
+    // UPDATES ACTIONS
+    fun checkForUpdates() {
+        viewModelScope.launch {
+            updateManager?.checkForUpdates(isManual = true)
+            preferencesRepository.setLastUpdateCheckTimestamp(System.currentTimeMillis())
+        }
+    }
+
+    fun startDownload(updateInfo: com.crescentapps.turnly.core.update.model.UpdateInfo) {
+        updateManager?.startDownload(updateInfo)
+    }
+
+    fun cancelDownload() {
+        updateManager?.cancelDownload()
+    }
+
+    fun installUpdate(apkFile: java.io.File, updateInfo: com.crescentapps.turnly.core.update.model.UpdateInfo): Boolean {
+        return updateManager?.installApk(apkFile, updateInfo) ?: false
+    }
+
+    fun onReturnFromSettings() {
+        updateManager?.onReturnFromSettings()
+    }
+
+    fun dismissUpdateDialog() {
+        updateManager?.dismissState()
+    }
+
+    fun createManageUnknownAppSourcesIntent(): Intent? {
+        return updateManager?.createManageUnknownAppSourcesIntent()
+    }
+
+    fun setUpdateCheckFrequency(frequency: UpdateFrequency, context: Context) {
+        viewModelScope.launch {
+            preferencesRepository.setUpdateCheckFrequency(frequency)
+            com.crescentapps.turnly.core.update.UpdateCheckWorker.schedule(context, frequency)
         }
     }
 }

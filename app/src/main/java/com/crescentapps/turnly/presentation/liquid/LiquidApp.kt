@@ -374,7 +374,7 @@ fun LiquidApp(
 
                                     composable(Screen.Settings.route) {
                                         val settingsViewModel: SettingsViewModel = viewModel {
-                                            SettingsViewModel(app.userPreferencesRepository, app.repository)
+                                            SettingsViewModel(app.userPreferencesRepository, app.repository, app.updateManager)
                                         }
                                         SettingsScreen(viewModel = settingsViewModel)
                                     }
