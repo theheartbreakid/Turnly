@@ -47,20 +47,6 @@ fun JoinRoomScreen(
     var roomCodeInput by remember { mutableStateOf(initialRoomCode.orEmpty()) }
     var userDisplayNameInput by remember { mutableStateOf("") }
     var isScanningMode by remember { mutableStateOf(false) }
-    var hasCameraPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    val cameraPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasCameraPermission = isGranted
-        if (isGranted) {
-            isScanningMode = true
-        }
-    }
 
     LaunchedEffect(initialRoomCode) {
         if (!initialRoomCode.isNullOrBlank()) {
@@ -214,15 +200,17 @@ fun JoinRoomScreen(
         } else if (isScanningMode) {
             // Live Scanner View
             LiquidCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f, fill = false),
                 backdrop = backdrop
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(18.dp)
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     Text(
                         text = "Scan Turnly QR Code",
@@ -231,39 +219,28 @@ fun JoinRoomScreen(
                         color = adaptiveColor
                     )
 
-                    // Responsive Scanner Viewport Frame
                     Box(
                         modifier = Modifier
-                            .sizeIn(minWidth = 200.dp, maxWidth = 260.dp, minHeight = 200.dp, maxHeight = 260.dp)
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(Color.Black.copy(alpha = 0.75f))
-                            .border(2.dp, colors.accent, RoundedCornerShape(24.dp)),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .height(340.dp)
+                            .clip(RoundedCornerShape(20.dp))
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.QrCodeScanner,
-                                contentDescription = null,
-                                tint = colors.accent,
-                                modifier = Modifier.size(56.dp)
-                            )
-                            Text(
-                                text = "Point camera at QR code",
-                                color = Color.White.copy(alpha = 0.9f),
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
+                        com.crescentapps.turnly.presentation.components.camera.QRScannerView(
+                            onQRCodeScanned = { rawPayload, extractedCode ->
+                                isScanningMode = false
+                                roomCodeInput = extractedCode
+                                viewModel.previewRoom(extractedCode) {}
+                            },
+                            onClose = { isScanningMode = false },
+                            frameBorderColor = colors.accent
+                        )
                     }
 
                     LiquidButton(
                         text = "Enter Code Manually",
                         onClick = { isScanningMode = false },
-                        backdrop = backdrop
+                        backdrop = backdrop,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -342,13 +319,7 @@ fun JoinRoomScreen(
                     LiquidButton(
                         text = "Scan QR Code",
                         icon = Icons.Default.QrCodeScanner,
-                        onClick = {
-                            if (hasCameraPermission) {
-                                isScanningMode = true
-                            } else {
-                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
-                        },
+                        onClick = { isScanningMode = true },
                         backdrop = backdrop,
                         modifier = Modifier.fillMaxWidth()
                     )

@@ -20,6 +20,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -443,6 +444,7 @@ fun M3JoinRoomScreen(
     val uiState by viewModel.uiState.collectAsState()
     var roomCodeInput by remember { mutableStateOf(initialRoomCode.orEmpty()) }
     var userDisplayNameInput by remember { mutableStateOf("") }
+    var isScanningMode by remember { mutableStateOf(false) }
 
     LaunchedEffect(initialRoomCode) {
         if (!initialRoomCode.isNullOrBlank()) {
@@ -456,7 +458,13 @@ fun M3JoinRoomScreen(
             TopAppBar(
                 title = { Text("Join a Room", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        if (isScanningMode) {
+                            isScanningMode = false
+                        } else {
+                            onNavigateBack()
+                        }
+                    }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
@@ -489,24 +497,83 @@ fun M3JoinRoomScreen(
                             singleLine = true
                         )
 
-                        Button(
-                            onClick = {
-                                viewModel.joinRoom(
-                                    roomCode = preview.roomCode,
-                                    displayName = userDisplayNameInput.ifBlank { "Member" },
-                                    onSuccess = { room -> onJoinedSuccessfully(room.id) }
-                                )
-                            },
-                            enabled = !uiState.isJoining,
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = onNavigateBack,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Cancel")
+                            }
+
+                            Button(
+                                onClick = {
+                                    viewModel.joinRoom(
+                                        roomCode = preview.roomCode,
+                                        displayName = userDisplayNameInput.ifBlank { "Member" },
+                                        onSuccess = { room -> onJoinedSuccessfully(room.id) }
+                                    )
+                                },
+                                enabled = !uiState.isJoining,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(if (uiState.isJoining) "Joining..." else "Join Room")
+                            }
+                        }
+                    }
+                }
+            } else if (isScanningMode) {
+                ElevatedCard(
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        Text(
+                            text = "Scan Turnly QR Code",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(340.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                        ) {
+                            com.crescentapps.turnly.presentation.components.camera.QRScannerView(
+                                onQRCodeScanned = { rawPayload, extractedCode ->
+                                    isScanningMode = false
+                                    roomCodeInput = extractedCode
+                                    viewModel.previewRoom(extractedCode) {}
+                                },
+                                onClose = { isScanningMode = false },
+                                frameBorderColor = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                        OutlinedButton(
+                            onClick = { isScanningMode = false },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(if (uiState.isJoining) "Joining..." else "Join Room")
+                            Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Enter Code Manually")
                         }
                     }
                 }
             } else {
                 Text("Enter 6-Character Room Code", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text("Ask the room owner for their code or invite.", style = MaterialTheme.typography.bodyMedium)
+                Text("Ask the room owner for their code or scan their QR code.", style = MaterialTheme.typography.bodyMedium)
 
                 OutlinedTextField(
                     value = roomCodeInput,
@@ -535,6 +602,30 @@ fun M3JoinRoomScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(if (uiState.isJoining) "Finding Room..." else "Find Room")
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    HorizontalDivider(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "OR",
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f))
+                }
+
+                OutlinedButton(
+                    onClick = { isScanningMode = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Scan QR Code")
                 }
             }
         }

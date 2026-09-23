@@ -30,16 +30,72 @@ object QRCodeUtils {
      */
     fun parseInvitePayload(rawContent: String): RoomInvitePayload? {
         return runCatching {
-            val content = rawContent.trim()
-            val base64Data = when {
-                content.startsWith("turnly://room/") -> content.removePrefix("turnly://room/")
-                content.startsWith("http") && content.contains("/room/") -> content.substringAfter("/room/")
-                else -> content
+            var content = rawContent.trim()
+            // In case of URI encoded string
+            if (content.contains("%")) {
+                content = runCatching { java.net.URLDecoder.decode(content, "UTF-8") }.getOrDefault(content)
             }
-            val jsonBytes = java.util.Base64.getUrlDecoder().decode(base64Data)
+            val base64Data = when {
+                content.startsWith("turnly://room/") -> content.removePrefix("turnly://room/").substringBefore("?").substringBefore("/")
+                content.startsWith("http") && content.contains("/room/") -> content.substringAfter("/room/").substringBefore("?").substringBefore("/")
+                else -> content.substringBefore("?").substringBefore("/")
+            }
+            val jsonBytes = try {
+                java.util.Base64.getUrlDecoder().decode(base64Data)
+            } catch (e: Exception) {
+                java.util.Base64.getDecoder().decode(base64Data)
+            }
             val jsonStr = String(jsonBytes, Charsets.UTF_8)
             json.decodeFromString<RoomInvitePayload>(jsonStr)
         }.getOrNull()
+    }
+
+    /**
+     * Extracts the exact room code from any valid Turnly QR code payload,
+     * deep link URI (turnly://room/...), HTTP fallback link, or direct 6-character room code.
+     */
+    fun extractRoomCode(rawContent: String): String? {
+        val trimmed = rawContent.trim()
+        if (trimmed.isEmpty()) return null
+
+        // 1. Direct valid room code (e.g. "X7K9P2")
+        val directNormalized = RoomCodeGenerator.normalizeCode(trimmed)
+        if (RoomCodeGenerator.isValidCode(directNormalized)) {
+            return directNormalized
+        }
+
+        // 2. Query parameter (?code=XYZ123)
+        if (trimmed.contains("code=")) {
+            val extractedParam = trimmed.substringAfter("code=").substringBefore("&").substringBefore("#")
+            val normalizedParam = RoomCodeGenerator.normalizeCode(extractedParam)
+            if (RoomCodeGenerator.isValidCode(normalizedParam)) {
+                return normalizedParam
+            }
+        }
+
+        // 3. Encoded RoomInvitePayload in deep link or raw Base64
+        val payload = parseInvitePayload(trimmed)
+        if (payload != null) {
+            val code = RoomCodeGenerator.normalizeCode(payload.roomCode)
+            if (RoomCodeGenerator.isValidCode(code)) {
+                return code
+            }
+            // If custom valid code format
+            if (payload.roomCode.isNotBlank()) {
+                return payload.roomCode.trim()
+            }
+        }
+
+        // 4. Path parameter if directly formatted as turnly://room/X7K9P2
+        if (trimmed.startsWith("turnly://room/")) {
+            val pathPart = trimmed.removePrefix("turnly://room/").substringBefore("?").substringBefore("/").trim()
+            val normalizedPath = RoomCodeGenerator.normalizeCode(pathPart)
+            if (RoomCodeGenerator.isValidCode(normalizedPath)) {
+                return normalizedPath
+            }
+        }
+
+        return null
     }
 
     /**

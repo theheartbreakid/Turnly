@@ -19,10 +19,15 @@ zxing = "3.5.3"
 kyantShapes = "1.2.0"
 vico = "1.14.0"
 prismal = "1.0.5"
+camerax = "1.4.1"
 coil = "2.6.0"
 kyantBackdrop = "2.0.0"
 
 [libraries]
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 prismal = { group = "com.github.styropyr0", name = "Prismal", version.ref = "prismal" }
 kyant-backdrop = { group = "io.github.kyant0", name = "backdrop", version.ref = "kyantBackdrop" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }

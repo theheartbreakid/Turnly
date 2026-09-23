@@ -72,6 +72,12 @@ dependencies {
     // ZXing for QR Code generation and parsing
     implementation(libs.zxing.core)
 
+    // CameraX for Camera Preview & QR Code Scanning
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
     // Kyant Shapes & Backdrop for Liquid UI (backdrop source is embedded locally in com.kyant.backdrop)
     implementation(libs.kyant.shapes)
 

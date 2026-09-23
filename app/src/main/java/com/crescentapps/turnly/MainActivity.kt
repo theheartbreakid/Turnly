@@ -51,6 +51,8 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { /* Permission result handled */ }
 
+    private val incomingDeepLinkCode = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -65,22 +67,34 @@ class MainActivity : ComponentActivity() {
 
         DailyNotificationScheduler.scheduleDailyAlarm(this)
 
-        val deepLinkCode = intent?.data?.let { uri ->
-            if (uri.scheme == "turnly" && uri.host == "room") {
-                uri.path?.trimStart('/')
-            } else null
-        }
+        handleIncomingIntent(intent)
 
         setContent {
             val prefs by app.userPreferencesRepository.userPreferencesFlow.collectAsState(
                 initial = com.crescentapps.turnly.data.preferences.UserPreferences()
             )
+            val deepLinkCode by incomingDeepLinkCode.collectAsState()
 
             com.crescentapps.turnly.presentation.TurnlyApp(
                 app = app,
                 prefs = prefs,
                 deepLinkCode = deepLinkCode
             )
+        }
+    }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIncomingIntent(intent)
+    }
+
+    private fun handleIncomingIntent(intent: android.content.Intent?) {
+        val uri = intent?.data ?: return
+        val rawUriString = uri.toString()
+        val extractedCode = com.crescentapps.turnly.core.util.QRCodeUtils.extractRoomCode(rawUriString)
+        if (!extractedCode.isNullOrBlank()) {
+            incomingDeepLinkCode.value = extractedCode
         }
     }
 }

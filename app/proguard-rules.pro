@@ -19,20 +19,24 @@
 }
 
 # ZXing QR Code
--keep class com.google.zxing.** { *; }
 -dontwarn com.google.zxing.**
 
+# CameraX
+-dontwarn androidx.camera.**
+-keep class androidx.camera.** { *; }
+-dontwarn androidx.camera.core.impl.**
+
 # Coil Image Loader
--keep class coil.** { *; }
 -dontwarn coil.**
 
 # Kyant Backdrop & Shapes
--keep class io.github.kyant0.** { *; }
 -dontwarn io.github.kyant0.**
 
 # Prismal Rendering Engine
--keep class com.github.styropyr0.prismal.** { *; }
 -dontwarn com.github.styropyr0.prismal.**
+-keepclasseswithmembernames class com.github.styropyr0.prismal.** {
+    native <methods>;
+}
 
 # Android Architecture Components
 -keepclassmembers class * extends androidx.lifecycle.ViewModel {
