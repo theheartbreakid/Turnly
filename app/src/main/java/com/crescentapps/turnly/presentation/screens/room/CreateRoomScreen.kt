@@ -11,13 +11,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -90,7 +100,7 @@ fun CreateRoomScreen(
 
             Text(
                 text = if (createdRoom != null) "Room Created" else "Step $currentStep of 2",
-                style = MaterialTheme.typography.titleMedium,
+                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                 fontWeight = FontWeight.Bold,
                 color = adaptiveColor
             )
@@ -113,14 +123,14 @@ fun CreateRoomScreen(
                 item {
                     Text(
                         text = "Room Ready!",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Black,
                         color = adaptiveColor
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Invite members by sharing the room code or QR code.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                         color = adaptiveColor.copy(alpha = 0.7f),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
@@ -140,7 +150,7 @@ fun CreateRoomScreen(
                         ) {
                             Text(
                                 text = room.name,
-                                style = MaterialTheme.typography.titleLarge,
+                                style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                                 fontWeight = FontWeight.ExtraBold,
                                 color = adaptiveColor
                             )
@@ -232,13 +242,13 @@ fun CreateRoomScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                     Text(
                         text = "Name your P2P Room",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Black,
                         color = adaptiveColor
                     )
                     Text(
                         text = "Create a room for your household, roommates, or team (e.g. 'Family Turns').",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                         color = adaptiveColor.copy(alpha = 0.7f)
                     )
 
@@ -279,14 +289,14 @@ fun CreateRoomScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "Choose Schedules to Share",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Black,
                         color = adaptiveColor
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Only selected schedules will synchronize. Unselected schedules remain 100% private to your device.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                         color = adaptiveColor.copy(alpha = 0.7f)
                     )
 
@@ -305,7 +315,7 @@ fun CreateRoomScreen(
                             Text(
                                 text = "ⓘ Shared schedules synchronize participant names, turn assignments, completion status, notes, and payment amounts with connected room members.",
                                 fontSize = 12.sp,
-                                style = MaterialTheme.typography.bodySmall,
+                                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                                 color = adaptiveColor.copy(alpha = 0.85f)
                             )
                         }
@@ -316,7 +326,7 @@ fun CreateRoomScreen(
                     if (uiState.availableSchedules.isEmpty()) {
                         Text(
                             text = "No local schedules found. You can still create the room now and share schedules later.",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                             color = adaptiveColor.copy(alpha = 0.7f)
                         )
                     } else {
@@ -346,14 +356,14 @@ fun CreateRoomScreen(
                                                 text = schedule.name,
                                                 fontWeight = FontWeight.Bold,
                                                 fontSize = 15.sp,
-                                                style = MaterialTheme.typography.titleMedium,
+                                                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                                                 color = adaptiveColor
                                             )
                                             Spacer(modifier = Modifier.height(2.dp))
                                             Text(
                                                 text = schedule.type.displayName,
                                                 fontSize = 12.sp,
-                                                style = MaterialTheme.typography.bodyMedium,
+                                                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                                                 color = adaptiveColor.copy(alpha = 0.65f)
                                             )
                                         }

@@ -8,11 +8,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,7 +86,7 @@ fun JoinRoomScreen(
 
             Text(
                 text = "Join a P2P Room",
-                style = MaterialTheme.typography.titleMedium,
+                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                 fontWeight = FontWeight.Bold,
                 color = adaptiveColor
             )
@@ -101,20 +111,20 @@ fun JoinRoomScreen(
                 ) {
                     Text(
                         text = "Join Room?",
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Black,
                         color = adaptiveColor
                     )
                     Text(
                         text = preview.name,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Bold,
                         color = colors.accent
                     )
                     if (preview.description.isNotBlank()) {
                         Text(
                             text = preview.description,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                             color = adaptiveColor.copy(alpha = 0.7f)
                         )
                     }
@@ -125,24 +135,24 @@ fun JoinRoomScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Room Owner:", style = MaterialTheme.typography.bodyMedium, color = adaptiveColor.copy(alpha = 0.7f))
-                        Text(preview.ownerDisplayName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = adaptiveColor)
+                        Text("Room Owner:", style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.7f))
+                        Text(preview.ownerDisplayName, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold), fontWeight = FontWeight.Bold, color = adaptiveColor)
                     }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Members:", style = MaterialTheme.typography.bodyMedium, color = adaptiveColor.copy(alpha = 0.7f))
-                        Text("${preview.members.size}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = adaptiveColor)
+                        Text("Members:", style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.7f))
+                        Text("${preview.members.size}", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold), fontWeight = FontWeight.Bold, color = adaptiveColor)
                     }
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Shared Schedules:", style = MaterialTheme.typography.bodyMedium, color = adaptiveColor.copy(alpha = 0.7f))
-                        Text("${preview.sharedSchedules.size}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = adaptiveColor)
+                        Text("Shared Schedules:", style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.7f))
+                        Text("${preview.sharedSchedules.size}", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold), fontWeight = FontWeight.Bold, color = adaptiveColor)
                     }
 
                     if (preview.sharedSchedules.isNotEmpty()) {
@@ -151,7 +161,7 @@ fun JoinRoomScreen(
                                 Text(
                                     text = "• ${s.schedule.name} (${s.schedule.type.displayName})",
                                     fontSize = 13.sp,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                                     color = adaptiveColor.copy(alpha = 0.85f)
                                 )
                             }
@@ -214,7 +224,7 @@ fun JoinRoomScreen(
                 ) {
                     Text(
                         text = "Scan Turnly QR Code",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Bold,
                         color = adaptiveColor
                     )
@@ -258,13 +268,13 @@ fun JoinRoomScreen(
                 ) {
                     Text(
                         text = "Enter 6-Character Room Code",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Bold,
                         color = adaptiveColor
                     )
                     Text(
                         text = "Ask the room owner for their 6-character room code or scan their QR code.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                         color = adaptiveColor.copy(alpha = 0.7f)
                     )
 

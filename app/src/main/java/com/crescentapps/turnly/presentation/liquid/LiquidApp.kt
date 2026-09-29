@@ -2,7 +2,6 @@ package com.crescentapps.turnly.presentation.liquid
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,7 +62,7 @@ fun LiquidApp(
     TurnlyAppTheme(
         themeMode = prefs.themeMode,
         isAmoled = prefs.isAmoled,
-        dynamicColor = prefs.dynamicColors,
+        
         appFontFamily = prefs.appFontFamily,
         appFontWeight = prefs.appFontWeight,
         appFontTilt = prefs.appFontTilt
@@ -236,16 +235,8 @@ fun LiquidApp(
                             )
                         }
 
-                        // Main Navigation Scaffold
-                        Scaffold(
-                            modifier = Modifier.weight(1f),
-                            containerColor = Color.Transparent
-                        ) { innerPadding ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(innerPadding)
-                            ) {
+                        // Main Navigation Area
+                        Box(modifier = Modifier.weight(1f).fillMaxSize()) {
                                 NavHost(
                                     navController = navController,
                                     startDestination = Screen.Home.route,
@@ -439,4 +430,4 @@ fun LiquidApp(
             }
         }
     }
-}
+

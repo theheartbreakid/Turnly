@@ -11,7 +11,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Scaffold
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier

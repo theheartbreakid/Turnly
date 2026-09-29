@@ -14,12 +14,16 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +60,7 @@ fun QRScannerView(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
     instructionText: String = "Point your camera at the room QR code",
-    frameBorderColor: Color = MaterialTheme.colorScheme.primary
+    frameBorderColor: Color = LocalTurnlyColors.current.accent
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -195,12 +199,8 @@ fun QRScannerView(
                         .statusBarsPadding(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    IconButton(
-                        onClick = onClose,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.Black.copy(alpha = 0.5f),
-                            contentColor = Color.White
-                        )
+                    com.crescentapps.turnly.presentation.components.PrismalIconButton(
+                        onClick = onClose
                     ) {
                         Icon(Icons.Default.Close, contentDescription = "Close scanner")
                     }
@@ -239,9 +239,9 @@ fun QRScannerView(
                 }
 
                 // Instruction bottom banner
-                Surface(
+                com.crescentapps.turnly.presentation.components.PrismalSurface(
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.Black.copy(alpha = 0.65f),
+                    tonalColor = Color.Black.copy(alpha = 0.65f),
                     modifier = Modifier
                         .navigationBarsPadding()
                         .padding(bottom = 16.dp)
@@ -268,7 +268,7 @@ fun QRScannerView(
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = LocalTurnlyColors.current.accent,
                     modifier = Modifier.size(64.dp)
                 )
 
@@ -276,7 +276,7 @@ fun QRScannerView(
 
                 Text(
                     text = "Camera Permission Required",
-                    style = MaterialTheme.typography.titleLarge,
+                    style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     textAlign = TextAlign.Center
@@ -286,7 +286,7 @@ fun QRScannerView(
 
                 Text(
                     text = "Turnly needs camera access to scan room invite QR codes and connect to shared schedule rooms seamlessly.",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                     color = Color.White.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center
                 )
@@ -294,24 +294,24 @@ fun QRScannerView(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 if (permissionDeniedCount > 1) {
-                    Button(
+                    com.crescentapps.turnly.presentation.components.liquid.LiquidButton(
+                        backdrop = null,
                         onClick = {
                             val intent = Intent(
                                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                                 Uri.fromParts("package", context.packageName, null)
                             )
                             context.startActivity(intent)
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        }
                     ) {
                         Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text("Open App Settings")
                     }
                 } else {
-                    Button(
-                        onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    com.crescentapps.turnly.presentation.components.liquid.LiquidButton(
+                        backdrop = null,
+                        onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }
                     ) {
                         Text("Grant Permission")
                     }
@@ -319,7 +319,7 @@ fun QRScannerView(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                TextButton(onClick = onClose) {
+                com.crescentapps.turnly.presentation.components.liquid.LiquidButton(backdrop=null, onClick = onClose) {
                     Text("Enter Code Manually", color = Color.White.copy(alpha = 0.85f))
                 }
             }

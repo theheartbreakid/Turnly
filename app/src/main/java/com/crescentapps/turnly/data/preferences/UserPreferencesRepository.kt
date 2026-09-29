@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.crescentapps.turnly.core.model.FirstDayOfWeek
 import com.crescentapps.turnly.core.model.ThemeMode
-import com.crescentapps.turnly.core.model.UiMode
 import com.crescentapps.turnly.core.model.UpdateFrequency
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,7 +19,6 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  */
 data class UserPreferences(
     // UI Visual System Mode
-    val uiMode: UiMode = UiMode.MATERIAL_3,
     val hasAcceptedLiquidWarning: Boolean = false,
 
     // Appearance
@@ -190,8 +188,6 @@ class UserPreferencesRepository(private val context: Context) {
         val HAPTIC_INTENSITY = floatPreferencesKey("haptic_intensity")
 
         val BACKGROUND_IMAGE_URI = stringPreferencesKey("background_image_uri")
-
-        val UI_MODE = stringPreferencesKey("ui_mode")
         val HAS_ACCEPTED_LIQUID_WARNING = booleanPreferencesKey("has_accepted_liquid_warning")
 
         val NOTIFICATIONS_ENABLED = booleanPreferencesKey("notifications_enabled")
@@ -208,8 +204,6 @@ class UserPreferencesRepository(private val context: Context) {
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = context.dataStore.data.map { preferences ->
-        val uiModeStr = preferences[PreferencesKeys.UI_MODE] ?: UiMode.MATERIAL_3.name
-        val uiMode = runCatching { UiMode.valueOf(uiModeStr) }.getOrDefault(UiMode.MATERIAL_3)
         val hasAcceptedLiquid = preferences[PreferencesKeys.HAS_ACCEPTED_LIQUID_WARNING] ?: false
 
         val themeStr = preferences[PreferencesKeys.THEME_MODE] ?: ThemeMode.SYSTEM.name
@@ -224,7 +218,6 @@ class UserPreferencesRepository(private val context: Context) {
         }
 
         UserPreferences(
-            uiMode = uiMode,
             hasAcceptedLiquidWarning = hasAcceptedLiquid,
             themeMode = theme,
             isAmoled = preferences[PreferencesKeys.IS_AMOLED] ?: false,
@@ -294,10 +287,6 @@ class UserPreferencesRepository(private val context: Context) {
         )
     }
 
-    suspend fun setUiMode(mode: UiMode) {
-        context.dataStore.edit { it[PreferencesKeys.UI_MODE] = mode.name }
-    }
-
     suspend fun setHasAcceptedLiquidWarning(accepted: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.HAS_ACCEPTED_LIQUID_WARNING] = accepted }
     }
@@ -308,10 +297,6 @@ class UserPreferencesRepository(private val context: Context) {
 
     suspend fun setAmoled(enabled: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.IS_AMOLED] = enabled }
-    }
-
-    suspend fun setDynamicColors(enabled: Boolean) {
-        context.dataStore.edit { it[PreferencesKeys.DYNAMIC_COLORS] = enabled }
     }
 
     suspend fun setAdaptiveLuminance(enabled: Boolean) {

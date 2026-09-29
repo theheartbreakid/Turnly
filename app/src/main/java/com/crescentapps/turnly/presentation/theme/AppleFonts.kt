@@ -1,6 +1,5 @@
 package com.crescentapps.turnly.presentation.theme
 
-import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -53,43 +52,3 @@ enum class AppleFontWeight(val label: String, val weight: FontWeight) {
     }
 }
 
-/**
- * Creates an authoritative Typography suite configuring font family, base weight,
- * and font tilt (synthetic italic/oblique fallback).
- */
-fun buildTurnlyTypography(
-    fontFamily: FontFamily,
-    fontWeight: FontWeight,
-    isTilt: Boolean = false
-): Typography {
-    val fontStyle = if (isTilt) FontStyle.Italic else FontStyle.Normal
-    val fontSynthesis = if (isTilt) FontSynthesis.All else FontSynthesis.Weight
-
-    fun styleWithWeight(w: FontWeight): TextStyle = TextStyle(
-        fontFamily = fontFamily,
-        fontWeight = w,
-        fontStyle = fontStyle,
-        fontSynthesis = fontSynthesis
-    )
-
-    // Base default style respects selected weight & tilt
-    val baseStyle = styleWithWeight(fontWeight)
-
-    return Typography(
-        displayLarge = styleWithWeight(FontWeight.Bold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        displayMedium = styleWithWeight(FontWeight.Bold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        displaySmall = styleWithWeight(FontWeight.Bold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        headlineLarge = styleWithWeight(FontWeight.Black).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        headlineMedium = styleWithWeight(FontWeight.Bold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        headlineSmall = styleWithWeight(FontWeight.SemiBold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        titleLarge = styleWithWeight(FontWeight.Bold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        titleMedium = styleWithWeight(FontWeight.SemiBold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        titleSmall = styleWithWeight(FontWeight.Medium).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        bodyLarge = baseStyle,
-        bodyMedium = baseStyle,
-        bodySmall = styleWithWeight(FontWeight.Normal).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        labelLarge = styleWithWeight(FontWeight.SemiBold).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        labelMedium = styleWithWeight(FontWeight.Medium).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis),
-        labelSmall = styleWithWeight(FontWeight.Normal).copy(fontStyle = fontStyle, fontSynthesis = fontSynthesis)
-    )
-}

@@ -8,13 +8,23 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -156,7 +166,7 @@ fun RoomDetailScreen(
 
             Text(
                 text = room.name,
-                style = MaterialTheme.typography.titleMedium,
+                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                 fontWeight = FontWeight.Bold,
                 color = adaptiveColor
             )
@@ -201,7 +211,7 @@ fun RoomDetailScreen(
                                 text = "Code: ${room.roomCode}",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                                 color = adaptiveColor.copy(alpha = 0.75f)
                             )
                         }
@@ -239,7 +249,7 @@ fun RoomDetailScreen(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                     color = colors.accent
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -274,7 +284,7 @@ fun RoomDetailScreen(
                                     Text(
                                         text = member.displayName,
                                         fontWeight = FontWeight.SemiBold,
-                                        style = MaterialTheme.typography.titleMedium,
+                                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                                         fontSize = 15.sp,
                                         color = adaptiveColor
                                     )
@@ -291,7 +301,7 @@ fun RoomDetailScreen(
                                 Text(
                                     text = if (member.presence == MemberPresence.ONLINE) "Online" else "Offline",
                                     fontSize = 12.sp,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                                     color = adaptiveColor.copy(alpha = 0.6f)
                                 )
                             }
@@ -307,14 +317,14 @@ fun RoomDetailScreen(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                     color = colors.accent
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 if (uiState.sharedSchedules.isEmpty()) {
                     Text(
                         text = "No schedules shared in this room yet.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                         color = adaptiveColor.copy(alpha = 0.6f)
                     )
                 } else {
@@ -337,7 +347,7 @@ fun RoomDetailScreen(
                                         Text(
                                             text = localSched?.name ?: "Shared Schedule",
                                             fontWeight = FontWeight.Bold,
-                                            style = MaterialTheme.typography.titleMedium,
+                                            style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                                             fontSize = 15.sp,
                                             color = adaptiveColor
                                         )
@@ -345,7 +355,7 @@ fun RoomDetailScreen(
                                         Text(
                                             text = localSched?.type?.displayName ?: "Rotation",
                                             fontSize = 12.sp,
-                                            style = MaterialTheme.typography.bodyMedium,
+                                            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                                             color = adaptiveColor.copy(alpha = 0.65f)
                                         )
                                     }

@@ -4,6 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -13,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,7 +86,7 @@ fun CreateScheduleScreen(
 
             Text(
                 text = "Step ${uiState.currentStep} of 3",
-                style = MaterialTheme.typography.titleMedium,
+                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                 fontWeight = FontWeight.Bold,
                 color = adaptiveColor
             )
@@ -119,8 +129,8 @@ fun CreateScheduleScreen(
                     onClick = { viewModel.nextStep() },
                     backdrop = backdrop,
                     modifier = Modifier.weight(1f),
-                    surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                    surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.2f),
+                    tint = LocalTurnlyColors.current.accent.copy(alpha = 0.35f)
                 ) {
                     Text("Next", color = colors.primary, fontWeight = FontWeight.Bold)
                 }
@@ -129,8 +139,8 @@ fun CreateScheduleScreen(
                     onClick = { if (!uiState.isSaving) viewModel.saveSchedule() },
                     backdrop = backdrop,
                     modifier = Modifier.weight(1f),
-                    surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                    surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.25f),
+                    tint = LocalTurnlyColors.current.accent.copy(alpha = 0.4f)
                 ) {
                     Text(if (uiState.isSaving) "Creating..." else "Create Schedule", color = colors.primary, fontWeight = FontWeight.Bold)
                 }
@@ -162,7 +172,7 @@ fun StepOneBasicInfo(viewModel: ScheduleFormViewModel, uiState: CreateScheduleUi
                         text = "WHAT ARE YOU ORGANIZING?",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = LocalTurnlyColors.current.accent,
                         letterSpacing = 1.sp
                     )
                     Spacer(modifier = Modifier.height(6.dp))
@@ -205,14 +215,14 @@ fun StepOneBasicInfo(viewModel: ScheduleFormViewModel, uiState: CreateScheduleUi
                             LiquidChip(
                                 onClick = { viewModel.updateType(type) },
                                 backdrop = backdrop,
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
-                                surfaceColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f)
+                                tint = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.4f) else Color.Transparent,
+                                surfaceColor = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f)
                             ) {
                                 Text(
                                     text = type.displayName,
                                     fontSize = 12.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else adaptiveColor.copy(alpha = 0.8f)
+                                    color = if (isSelected) LocalTurnlyColors.current.accent else adaptiveColor.copy(alpha = 0.8f)
                                 )
                             }
                         }
@@ -273,10 +283,10 @@ fun StepOneBasicInfo(viewModel: ScheduleFormViewModel, uiState: CreateScheduleUi
                                     LiquidChip(
                                         onClick = { viewModel.updateSelectedRoomId(room.id) },
                                         backdrop = backdrop,
-                                        tint = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
-                                        surfaceColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f)
+                                        tint = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.4f) else Color.Transparent,
+                                        surfaceColor = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f)
                                     ) {
-                                        Text(text = room.name, color = if (isSelected) MaterialTheme.colorScheme.primary else adaptiveColor)
+                                        Text(text = room.name, color = if (isSelected) LocalTurnlyColors.current.accent else adaptiveColor)
                                     }
                                 }
                             }
@@ -328,8 +338,8 @@ fun StepTwoPeople(viewModel: ScheduleFormViewModel, uiState: CreateScheduleUiSta
                                 }
                             },
                             backdrop = backdrop,
-                            surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                            surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.2f),
+                            tint = LocalTurnlyColors.current.accent.copy(alpha = 0.35f)
                         ) {
                             Text("Add", color = Color.White, fontWeight = FontWeight.Bold)
                         }
@@ -364,7 +374,7 @@ fun StepTwoPeople(viewModel: ScheduleFormViewModel, uiState: CreateScheduleUiSta
                 text = "PARTICIPANTS ( added - min 2)",
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = LocalTurnlyColors.current.accent
             )
         }
 
@@ -437,14 +447,14 @@ fun StepThreeRotation(viewModel: ScheduleFormViewModel, uiState: CreateScheduleU
                             LiquidChip(
                                 onClick = { viewModel.updateFrequencyType(fType) },
                                 backdrop = backdrop,
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
-                                surfaceColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f)
+                                tint = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.4f) else Color.Transparent,
+                                surfaceColor = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f)
                             ) {
                                 Text(
                                     text = fType.displayName,
                                     fontSize = 12.sp,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else adaptiveColor.copy(alpha = 0.8f)
+                                    color = if (isSelected) LocalTurnlyColors.current.accent else adaptiveColor.copy(alpha = 0.8f)
                                 )
                             }
                         }
@@ -463,7 +473,7 @@ fun StepThreeRotation(viewModel: ScheduleFormViewModel, uiState: CreateScheduleU
                                         .size(38.dp)
                                         .clip(CircleShape)
                                         .background(
-                                            if (isSelected) MaterialTheme.colorScheme.primary
+                                            if (isSelected) LocalTurnlyColors.current.accent
                                             else Color.White.copy(alpha = 0.08f)
                                         )
                                         .clickable { viewModel.toggleWeekday(dayVal) },

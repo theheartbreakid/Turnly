@@ -85,10 +85,6 @@ class SettingsViewModel(
     }
 
     // UI Visual System Mode
-    fun setUiMode(mode: UiMode) {
-        viewModelScope.launch { preferencesRepository.setUiMode(mode) }
-    }
-
     fun setHasAcceptedLiquidWarning(accepted: Boolean) {
         viewModelScope.launch { preferencesRepository.setHasAcceptedLiquidWarning(accepted) }
     }
@@ -100,10 +96,6 @@ class SettingsViewModel(
 
     fun setAmoled(enabled: Boolean) {
         viewModelScope.launch { preferencesRepository.setAmoled(enabled) }
-    }
-
-    fun setDynamicColors(enabled: Boolean) {
-        viewModelScope.launch { preferencesRepository.setDynamicColors(enabled) }
     }
 
     fun setAdaptiveLuminance(enabled: Boolean) {

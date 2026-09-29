@@ -21,9 +21,10 @@ import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Today
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -102,7 +103,7 @@ fun TurnlyLiquidDock(
         },
         backdrop = backdrop,
         tabsCount = mainScreens.size,
-        accentColor = MaterialTheme.colorScheme.primary,
+        accentColor = LocalTurnlyColors.current.accent,
         modifier = modifier
     ) {
         val turnlyColors = LocalTurnlyColors.current
@@ -112,26 +113,28 @@ fun TurnlyLiquidDock(
             
             val isDarkDockSurface = adaptiveColor.luminance() > 0.5f
             val selectedColor = if (isDarkDockSurface) {
-                if (MaterialTheme.colorScheme.primary.luminance() < 0.4f) Color.White else MaterialTheme.colorScheme.primary
+                if (turnlyColors.accent.luminance() < 0.4f) Color.White else turnlyColors.accent
             } else {
-                if (MaterialTheme.colorScheme.primary.luminance() > 0.65f) turnlyColors.textPrimary else MaterialTheme.colorScheme.primary
+                if (turnlyColors.accent.luminance() > 0.65f) turnlyColors.textPrimary else turnlyColors.accent
             }
 
             LiquidBottomTab(
                 onClick = { onNavigate(screen) }
             ) {
-                Icon(
+                Image(
                     imageVector = if (isSelected) screen.selectedIcon else screen.unselectedIcon,
                     contentDescription = screen.title,
                     modifier = Modifier.size(if (isCompact) 18.dp else 22.dp),
-                    tint = if (isSelected) selectedColor else adaptiveColor
+                    colorFilter = ColorFilter.tint(if (isSelected) selectedColor else adaptiveColor)
                 )
                 if (!isCompact) {
-                    Text(
+                    BasicText(
                         text = screen.title,
-                        fontSize = 9.sp,
-                        maxLines = 1,
-                        color = if (isSelected) selectedColor else adaptiveColor.copy(alpha = 0.7f)
+                        style = TextStyle(
+                            fontSize = 9.sp,
+                            color = if (isSelected) selectedColor else adaptiveColor.copy(alpha = 0.7f)
+                        ),
+                        maxLines = 1
                     )
                 }
             }
@@ -169,7 +172,7 @@ fun TurnlyLiquidNavigationRail(
         },
         backdrop = backdrop,
         tabsCount = mainScreens.size,
-        accentColor = MaterialTheme.colorScheme.primary,
+        accentColor = turnlyColors.accent,
         modifier = modifier
             .fillMaxHeight()
             .width(80.dp)
@@ -187,9 +190,9 @@ fun TurnlyLiquidNavigationRail(
 
                 val isDarkDockSurface = adaptiveColor.luminance() > 0.5f
                 val selectedColor = if (isDarkDockSurface) {
-                    if (MaterialTheme.colorScheme.primary.luminance() < 0.4f) Color.White else MaterialTheme.colorScheme.primary
+                    if (turnlyColors.accent.luminance() < 0.4f) Color.White else turnlyColors.accent
                 } else {
-                    if (MaterialTheme.colorScheme.primary.luminance() > 0.65f) turnlyColors.textPrimary else MaterialTheme.colorScheme.primary
+                    if (turnlyColors.accent.luminance() > 0.65f) turnlyColors.textPrimary else turnlyColors.accent
                 }
 
                 com.crescentapps.turnly.presentation.components.liquid.LiquidIconButton(
@@ -202,17 +205,19 @@ fun TurnlyLiquidNavigationRail(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(
+                        Image(
                             imageVector = if (isSelected) screen.selectedIcon else screen.unselectedIcon,
                             contentDescription = screen.title,
                             modifier = Modifier.size(20.dp),
-                            tint = if (isSelected) selectedColor else adaptiveColor
+                            colorFilter = ColorFilter.tint(if (isSelected) selectedColor else adaptiveColor)
                         )
-                        Text(
+                        BasicText(
                             text = screen.title,
-                            fontSize = 8.sp,
-                            maxLines = 1,
-                            color = if (isSelected) selectedColor else adaptiveColor.copy(alpha = 0.7f)
+                            style = TextStyle(
+                                fontSize = 8.sp,
+                                color = if (isSelected) selectedColor else adaptiveColor.copy(alpha = 0.7f)
+                            ),
+                            maxLines = 1
                         )
                     }
                 }

@@ -2,13 +2,23 @@ package com.crescentapps.turnly.presentation.screens.schedule
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,7 +58,7 @@ fun ScheduleDetailScreen(
 
     if (schedule == null) {
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            CircularProgressIndicator(color = LocalTurnlyColors.current.accent)
         }
         return
     }
@@ -71,7 +81,7 @@ fun ScheduleDetailScreen(
             }
             Text(
                 text = schedule.name,
-                style = MaterialTheme.typography.titleLarge,
+                style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                 fontWeight = FontWeight.Bold,
                 color = adaptiveColor
             )
@@ -79,12 +89,12 @@ fun ScheduleDetailScreen(
                 onClick = { viewModel.togglePauseSchedule() },
                 backdrop = backdrop,
                 iconSize = 40.dp,
-                surfaceColor = if (schedule.isPaused) LiquidColors.StatusCompleted.copy(alpha = 0.2f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                surfaceColor = if (schedule.isPaused) LiquidColors.StatusCompleted.copy(alpha = 0.2f) else LocalTurnlyColors.current.accent.copy(alpha = 0.2f)
             ) {
                 Icon(
                     imageVector = if (schedule.isPaused) Icons.Default.PlayArrow else Icons.Default.Pause,
                     contentDescription = if (schedule.isPaused) "Resume" else "Pause",
-                    tint = if (schedule.isPaused) LiquidColors.StatusCompleted else MaterialTheme.colorScheme.primary
+                    tint = if (schedule.isPaused) LiquidColors.StatusCompleted else LocalTurnlyColors.current.accent
                 )
             }
         }
@@ -114,11 +124,11 @@ fun ScheduleDetailScreen(
                                     text = "SCHEDULE TYPE",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = LocalTurnlyColors.current.accent
                                 )
                                 Text(
                                     text = schedule.type.displayName,
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                                     fontWeight = FontWeight.Bold,
                                     color = adaptiveColor
                                 )
@@ -145,7 +155,7 @@ fun ScheduleDetailScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = schedule.description,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                                 color = adaptiveColor.copy(alpha = 0.7f)
                             )
                         }
@@ -155,7 +165,7 @@ fun ScheduleDetailScreen(
                             Text(
                                 text = "Amount: ${CurrencyUtils.formatAmount(schedule.defaultAmount, schedule.currencyCode)} / turn",
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = LocalTurnlyColors.current.accent,
                                 fontSize = 14.sp
                             )
                         }
@@ -175,7 +185,7 @@ fun ScheduleDetailScreen(
                             text = "STATISTICS",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = LocalTurnlyColors.current.accent
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
@@ -185,7 +195,7 @@ fun ScheduleDetailScreen(
                             StatColumn(label = "Total Turns", value = "${uiState.totalTurnsCount}", color = adaptiveColor)
                             StatColumn(label = "Completed", value = "${uiState.completedCount}", color = LiquidColors.StatusCompleted)
                             if (schedule.type == ScheduleType.MONEY) {
-                                StatColumn(label = "Recorded", value = CurrencyUtils.formatAmount(uiState.totalRecordedAmount, schedule.currencyCode), color = MaterialTheme.colorScheme.primary)
+                                StatColumn(label = "Recorded", value = CurrencyUtils.formatAmount(uiState.totalRecordedAmount, schedule.currencyCode), color = LocalTurnlyColors.current.accent)
                             }
                         }
                     }
@@ -198,7 +208,7 @@ fun ScheduleDetailScreen(
                     text = "PARTICIPANTS ()",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = LocalTurnlyColors.current.accent
                 )
             }
 
@@ -240,7 +250,7 @@ fun ScheduleDetailScreen(
                     text = "UPCOMING TURNS (NEXT 14)",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = LocalTurnlyColors.current.accent
                 )
             }
 

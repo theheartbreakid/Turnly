@@ -2,13 +2,17 @@ package com.crescentapps.turnly.presentation.screens.schedule
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +56,7 @@ fun ScheduleListScreen(
         ) {
             Text(
                 text = "Turn Schedules",
-                style = MaterialTheme.typography.headlineMedium,
+                style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                 fontWeight = FontWeight.Black,
                 color = adaptiveColor
             )
@@ -61,8 +65,8 @@ fun ScheduleListScreen(
                 onClick = onCreateSchedule,
                 backdrop = backdrop,
                 iconSize = 42.dp,
-                surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.2f),
+                tint = LocalTurnlyColors.current.accent.copy(alpha = 0.35f)
             ) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add Schedule", tint = Color.White)
             }
@@ -134,7 +138,7 @@ fun ScheduleListScreen(
                                     text = CurrencyUtils.formatAmount(schedule.defaultAmount, schedule.currencyCode),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 15.sp,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = LocalTurnlyColors.current.accent
                                 )
                             }
                         }

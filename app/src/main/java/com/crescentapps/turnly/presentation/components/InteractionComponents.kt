@@ -4,6 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,7 +17,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -130,7 +134,7 @@ fun TurnCard(
                             text = CurrencyUtils.formatAmount(schedule.defaultAmount, schedule.currencyCode),
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = LocalTurnlyColors.current.accent
                         )
                     }
                 }
@@ -254,27 +258,27 @@ fun EmptyTurnState(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                    .background(LocalTurnlyColors.current.accent.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = LocalTurnlyColors.current.accent,
                     modifier = Modifier.size(32.dp)
                 )
             }
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                 fontWeight = FontWeight.Bold,
                 color = adaptiveColor
             )
 
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyMedium,
+                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                 color = adaptiveColor.copy(alpha = 0.7f),
                 modifier = Modifier.padding(horizontal = 12.dp),
                 textAlign = TextAlign.Center
@@ -283,8 +287,8 @@ fun EmptyTurnState(
             LiquidButton(
                 onClick = onAction,
                 backdrop = backdrop,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
-                surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                tint = LocalTurnlyColors.current.accent.copy(alpha = 0.35f),
+                surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.25f)
 ) {
                 Text(
                     text = actionText,
@@ -321,6 +325,6 @@ fun ConfirmDialog(
         positiveText = confirmText,
         negativeText = dismissText,
         onPositive = onConfirm,
-        accentColor = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+        accentColor = if (isDestructive) LocalTurnlyColors.current.statusMissed else LocalTurnlyColors.current.accent
     )
 }

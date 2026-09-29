@@ -4,8 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import com.crescentapps.turnly.presentation.components.Text
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
 import androidx.compose.ui.unit.sp
 import com.crescentapps.turnly.presentation.components.AdaptiveLuminanceProvider
 import com.crescentapps.turnly.presentation.components.LocalAdaptiveLuminanceActive
@@ -127,7 +128,7 @@ fun LiquidChip(
     backdrop: Backdrop?,
     modifier: Modifier = Modifier
 ) {
-    val primaryColor = MaterialTheme.colorScheme.primary
+    val primaryColor = LocalTurnlyColors.current.accent
     LiquidChip(
         modifier = modifier,
         onClick = onClick,

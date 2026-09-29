@@ -8,6 +8,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
@@ -82,7 +86,7 @@ fun LiquidDialog(
     val glassSettings = LocalGlassSettings.current
     val haptic = rememberPrismalHaptic()
     val containerColor = if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f) else Color(0xFF121212).copy(0.4f)
-    val finalAccentColor = accentColor ?: androidx.compose.material3.MaterialTheme.colorScheme.primary
+    val finalAccentColor = accentColor ?: turnlyColors.accent
 
     Dialog(
         onDismissRequest = onDismissRequest,
@@ -199,7 +203,7 @@ fun LiquidDialog(
                             .verticalScroll(rememberScrollState())
                     ) {
                         if (title.isNotEmpty()) {
-                            BasicText(
+                            Text(
                                 title,
                                 Modifier.padding(20.dp, if (icon != null) 12.dp else 20.dp, 20.dp, 8.dp),
                                 style = TextStyle(LocalPrismalAdaptiveColor.current, 20.sp, FontWeight.Bold)
@@ -207,7 +211,7 @@ fun LiquidDialog(
                         }
 
                         if (message.isNotEmpty()) {
-                            BasicText(
+                            Text(
                                 message,
                                 Modifier
                                     .then(if (isLightTheme) Modifier else Modifier.graphicsLayer(blendMode = BlendMode.Plus))
@@ -245,7 +249,7 @@ fun LiquidDialog(
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    BasicText(negativeText, style = TextStyle(LocalPrismalAdaptiveColor.current, 15.sp, FontWeight.Medium))
+                                    Text(negativeText, style = TextStyle(LocalPrismalAdaptiveColor.current, 15.sp, FontWeight.Medium))
                                 }
                             }
                             if (positiveText.isNotBlank()) {
@@ -263,7 +267,7 @@ fun LiquidDialog(
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    BasicText(
+                                    Text(
                                         positiveText,
                                         style = TextStyle(
                                             if (finalAccentColor.luminance() > 0.5f) Color.Black else Color.White,

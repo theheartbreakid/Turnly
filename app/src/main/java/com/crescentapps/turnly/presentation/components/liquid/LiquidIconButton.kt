@@ -4,7 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -185,7 +186,7 @@ fun LiquidIconButton(
         iconSize = size,
         tint = tint
     ) {
-        Icon(
+        Image(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(iconSize)

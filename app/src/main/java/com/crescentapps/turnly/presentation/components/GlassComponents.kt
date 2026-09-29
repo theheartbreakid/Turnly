@@ -8,11 +8,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -256,7 +258,6 @@ fun AdaptiveLuminanceProvider(
     }) {
         CompositionLocalProvider(
             LocalPrismalAdaptiveColor provides contentColorAnimation.value,
-            androidx.compose.material3.LocalContentColor provides contentColorAnimation.value,
             LocalAdaptiveLuminanceActive provides true
         ) {
             content()
@@ -372,7 +373,7 @@ val LocalDockSettings = staticCompositionLocalOf { DockSettings() }
 @Composable
 fun PrismalSurface(
     modifier: Modifier = Modifier,
-    shape: Shape = MaterialTheme.shapes.medium,
+    shape: Shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
     tonalColor: Color? = null,
     thickness: Float? = null,
     blurRadius: Float? = null,
@@ -572,7 +573,7 @@ fun PrismalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     tonalColor: Color? = null,
-    shape: Shape = MaterialTheme.shapes.large,
+    shape: Shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
     content: @Composable () -> Unit
 ) {
     PrismalSurface(
@@ -683,7 +684,7 @@ fun PrismalDialog(
                     ) {
                         Text(
                             text = title,
-                            style = MaterialTheme.typography.headlineSmall.copy(
+                            style = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.SemiBold).copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 24.sp,
                                 letterSpacing = (-0.5).sp
@@ -695,7 +696,7 @@ fun PrismalDialog(
                             Spacer(Modifier.height(12.dp))
                             Text(
                                 text = message,
-                                style = MaterialTheme.typography.bodyMedium.copy(
+                                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal).copy(
                                     fontSize = 15.sp,
                                     lineHeight = 20.sp
                                 ),
@@ -724,7 +725,7 @@ fun PrismalDialog(
                                 )
                             }
 
-                            val posColor = if (isDestructive) Color.Transparent else MaterialTheme.colorScheme.primary
+                            val posColor = if (isDestructive) Color.Transparent else LocalTurnlyColors.current.accent
                             val posTextColor = if (isDestructive) Color(0xFFFF5252) else (if (posColor.luminance() > 0.5f) Color.Black else Color.White)
 
                             PrismalDialogButton(
@@ -767,7 +768,7 @@ fun PrismalDialogButton(
         ) {
             Text(
                 text = text,
-                style = MaterialTheme.typography.labelLarge.copy(
+                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold).copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 ),

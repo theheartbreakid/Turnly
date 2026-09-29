@@ -1,11 +1,15 @@
 package com.crescentapps.turnly.presentation.screens.home
 
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,13 +63,13 @@ fun HomeScreen(
             Column {
                 Text(
                     text = "Turnly",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                     fontWeight = FontWeight.Black,
                     color = adaptiveColor
                 )
                 Text(
                     text = DateUtils.formatDisplay(DateUtils.todayString()),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                     color = adaptiveColor.copy(alpha = 0.7f)
                 )
             }
@@ -75,8 +79,8 @@ fun HomeScreen(
                 LiquidButton(
                     onClick = onCreateSchedule,
                     backdrop = backdrop,
-                    surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                    surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.2f),
+                    tint = LocalTurnlyColors.current.accent.copy(alpha = 0.35f)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -132,7 +136,7 @@ fun HomeScreen(
                                         fontSize = 12.sp,
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 1.sp,
-                                        color = MaterialTheme.colorScheme.primary
+                                        color = LocalTurnlyColors.current.accent
                                     )
                                     Text(
                                         text = firstPending.schedule.name,
@@ -166,7 +170,7 @@ fun HomeScreen(
                                                 ),
                                                 fontSize = 15.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = LocalTurnlyColors.current.accent
                                             )
                                         } else {
                                             Text(
@@ -193,8 +197,8 @@ fun HomeScreen(
                                         },
                                         backdrop = backdrop,
                                         modifier = Modifier.weight(1f),
-                                        surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
-                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                                        surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.25f),
+                                        tint = LocalTurnlyColors.current.accent.copy(alpha = 0.4f)
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Add,
@@ -229,7 +233,7 @@ fun HomeScreen(
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 1.sp,
-                                color = MaterialTheme.colorScheme.primary
+                                color = LocalTurnlyColors.current.accent
                             )
                             Text(
                                 text = "${uiState.totalPending} left · ${uiState.totalCompleted} done",
@@ -253,14 +257,14 @@ fun HomeScreen(
                                 LiquidChip(
                                     onClick = { viewModel.setFilter(filter) },
                                     backdrop = backdrop,
-                                    tint = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
-                                    surfaceColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else colors.surface.copy(alpha = 0.08f)
+                                    tint = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.4f) else Color.Transparent,
+                                    surfaceColor = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.2f) else colors.surface.copy(alpha = 0.08f)
                                 ) {
                                     Text(
                                         text = label,
                                         fontSize = 12.sp,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else adaptiveColor.copy(alpha = 0.8f)
+                                        color = if (isSelected) LocalTurnlyColors.current.accent else adaptiveColor.copy(alpha = 0.8f)
                                     )
                                 }
                             }
@@ -302,12 +306,12 @@ fun HomeScreen(
                 viewModel.markTurnComplete(turn, amount)
                 turnForAmountDialog = null
             },
-            accentColor = MaterialTheme.colorScheme.primary
+            accentColor = LocalTurnlyColors.current.accent
         ) {
-            OutlinedTextField(
+            com.crescentapps.turnly.presentation.components.liquid.AdaptiveGlassTextField(
                 value = enteredAmount,
                 onValueChange = { enteredAmount = it },
-                label = { Text("Amount (${turn.schedule.currencyCode})") },
+                label = "Amount (${turn.schedule.currencyCode})",
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )

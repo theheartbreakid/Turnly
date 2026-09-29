@@ -11,13 +11,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -180,13 +184,13 @@ fun RoomListScreen(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Shared Schedules",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                     fontWeight = FontWeight.Black,
                     color = adaptiveColor
                 )
                 Text(
                     text = "Keep in sync with family, roommates, or team members",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                     color = adaptiveColor.copy(alpha = 0.7f)
                 )
             }
@@ -237,7 +241,7 @@ fun RoomListScreen(
                             text = "Turn Update Discrepancy",
                             fontWeight = FontWeight.Bold,
                             color = colors.statusMissed,
-                            style = MaterialTheme.typography.titleSmall
+                            style = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium)
                         )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
@@ -245,7 +249,7 @@ fun RoomListScreen(
                         text = "Both you and another member updated \"${conflict.scheduleName}\" for ${DateUtils.formatDisplay(conflict.date)}. Which update should we keep?",
                         fontSize = 13.sp,
                         color = adaptiveColor.copy(alpha = 0.85f),
-                        style = MaterialTheme.typography.bodySmall
+                        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)
                     )
                     Spacer(modifier = Modifier.height(14.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -296,13 +300,13 @@ fun RoomListScreen(
                     }
                     Text(
                         text = "No P2P Rooms Connected",
-                        style = MaterialTheme.typography.titleLarge,
+                        style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                         fontWeight = FontWeight.Bold,
                         color = adaptiveColor
                     )
                     Text(
                         text = "Create a room to synchronize selected schedules across multiple phones using QR or room codes without an account.",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                         color = adaptiveColor.copy(alpha = 0.7f),
                         modifier = Modifier.padding(horizontal = 12.dp),
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -347,7 +351,7 @@ fun RoomListScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = room.name,
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                                     fontWeight = FontWeight.Bold,
                                     color = adaptiveColor
                                 )
@@ -355,7 +359,7 @@ fun RoomListScreen(
                                 Text(
                                     text = "Code: ${room.roomCode} · ${room.role.name.lowercase().replaceFirstChar { it.uppercase() }}",
                                     fontSize = 12.sp,
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                                     color = adaptiveColor.copy(alpha = 0.65f)
                                 )
                             }

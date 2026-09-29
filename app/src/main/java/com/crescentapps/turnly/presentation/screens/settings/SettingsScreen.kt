@@ -10,6 +10,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,7 +28,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -124,7 +134,7 @@ fun SettingsScreen(
             item(key = "title_settings") {
                 Text(
                     text = "Settings",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
                     fontWeight = FontWeight.Black,
                     color = adaptiveColor,
                     modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -132,7 +142,7 @@ fun SettingsScreen(
             }
 
             // LIVE PRISMAL GLASS PREVIEW SHOWCASE
-            if (prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.LIQUID) {
+            if (true) {
                 item(key = "header_prismal_preview") { SettingsSectionHeader("Live Prismal Glass Preview") }
                 item(key = "card_prismal_preview") {
                     PrismalCard(
@@ -164,20 +174,20 @@ fun SettingsScreen(
                                     )
                                     Text(
                                         text = "Prismal OpenGL Surface",
-                                        style = MaterialTheme.typography.titleMedium,
+                                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                                         fontWeight = FontWeight.Bold,
                                         color = adaptiveColor
                                     )
                                 }
                                 Text(
                                     text = "Active IOR: ${String.format(Locale.ROOT, "%.2f", liveGlassSettings.ior)}  ·  Normal: ${String.format(Locale.ROOT, "%.2f", liveGlassSettings.normalStrength)}  ·  Shininess: ${liveGlassSettings.shininess.toInt()}",
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                                     fontWeight = FontWeight.SemiBold,
                                     color = adaptiveColor.copy(alpha = 0.85f)
                                 )
                                 Text(
                                     text = "Uniforms update dynamically on drag with 0 frame drops",
-                                    style = MaterialTheme.typography.labelSmall,
+                                    style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
                                     color = adaptiveColor.copy(alpha = 0.6f)
                                 )
                             }
@@ -187,56 +197,6 @@ fun SettingsScreen(
             }
 
             // UI STYLE / MODE SELECTION
-            item(key = "header_uimode") { SettingsSectionHeader("UI Style") }
-            item(key = "card_uimode") {
-                LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
-                    Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { viewModel.setUiMode(com.crescentapps.turnly.core.model.UiMode.MATERIAL_3) }
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            RadioButton(
-                                selected = prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.MATERIAL_3,
-                                onClick = { viewModel.setUiMode(com.crescentapps.turnly.core.model.UiMode.MATERIAL_3) }
-                            )
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text("Material 3", fontWeight = FontWeight.Bold, color = adaptiveColor, fontSize = 16.sp)
-                                    Text("Stable · Recommended", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary, fontSize = 11.sp)
-                                }
-                                Text("Standard Material 3 design, fast performance, accessible contrast", fontSize = 12.sp, color = adaptiveColor.copy(alpha = 0.65f))
-                            }
-                        }
-
-                        HorizontalDivider(color = adaptiveColor.copy(alpha = 0.05f))
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            RadioButton(
-                                selected = prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.LIQUID,
-                                onClick = { /* already active */ }
-                            )
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Text("Liquid UI", fontWeight = FontWeight.Bold, color = adaptiveColor, fontSize = 16.sp)
-                                    Text("Experimental", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.tertiary, fontSize = 11.sp)
-                                }
-                                Text("Prismal glass, refraction shaders, fluid dynamic backgrounds", fontSize = 12.sp, color = adaptiveColor.copy(alpha = 0.65f))
-                            }
-                        }
-                    }
-                }
-            }
-
             // APPEARANCE SECTION
             item(key = "header_appearance") { SettingsSectionHeader("Appearance") }
             item(key = "card_appearance") {
@@ -257,16 +217,6 @@ fun SettingsScreen(
                             checked = prefs.isAmoled,
                             backdrop = backdrop
                         ) { viewModel.setAmoled(it) }
-
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
-
-                        SettingsToggleItem(
-                            title = "Dynamic Colors",
-                            subtitle = "Use Android Material You palette",
-                            icon = Icons.Outlined.ColorLens,
-                            checked = prefs.dynamicColors,
-                            backdrop = backdrop
-                        ) { viewModel.setDynamicColors(it) }
 
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 20.dp), color = adaptiveColor.copy(alpha = 0.05f))
 
@@ -376,7 +326,7 @@ fun SettingsScreen(
             }
 
             // UNIVERSAL GLASS SETTINGS
-            if (prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.LIQUID) {
+            if (true) {
                 item(key = "header_universal_glass") { SettingsSectionHeader("Universal Glass Settings") }
                 item(key = "card_universal_glass") {
                     LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
@@ -765,14 +715,14 @@ fun SettingsScreen(
                                     Icon(Icons.Outlined.SystemUpdate, null, tint = adaptiveColor, modifier = Modifier.size(24.dp))
                                 }
                                 Column {
-                                    Text("Check for Updates", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = adaptiveColor)
-                                    Text(checkingSubtitle, style = MaterialTheme.typography.bodySmall, color = adaptiveColor.copy(alpha = 0.6f))
+                                    Text("Check for Updates", style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold), fontWeight = FontWeight.SemiBold, color = adaptiveColor)
+                                    Text(checkingSubtitle, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.6f))
                                 }
                             }
                             LiquidButton(
                                 onClick = { viewModel.checkForUpdates() },
                                 backdrop = backdrop,
-                                surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.35f)
                             ) {
                                 Text(
                                     if (updateState is UpdateState.Checking) "Checking..." else "Check Now",
@@ -795,7 +745,7 @@ fun SettingsScreen(
             }
 
             // DOCK SETTINGS SECTION
-            if (prefs.uiMode == com.crescentapps.turnly.core.model.UiMode.LIQUID) {
+            if (true) {
                 item(key = "header_dock_settings") { SettingsSectionHeader("Dock Settings") }
                 item(key = "card_dock_settings") {
                     LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
@@ -1001,7 +951,7 @@ fun SettingsScreen(
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                         )
                         if (isSelected) {
-                            Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.Check, null, tint = LocalTurnlyColors.current.accent)
                         }
                     }
                 }
@@ -1034,7 +984,7 @@ fun SettingsScreen(
                         Column {
                             Text(
                                 style.label,
-                                style = MaterialTheme.typography.titleMedium.copy(
+                                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold).copy(
                                     fontFamily = style.fontFamily,
                                     fontWeight = AppleFontWeight.fromLabel(prefs.appFontWeight).weight
                                 ),
@@ -1042,7 +992,7 @@ fun SettingsScreen(
                             )
                             Text(
                                 "The quick brown fox jumps over the lazy dog",
-                                style = MaterialTheme.typography.bodySmall.copy(
+                                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal).copy(
                                     fontFamily = style.fontFamily,
                                     fontWeight = AppleFontWeight.fromLabel(prefs.appFontWeight).weight
                                 ),
@@ -1050,7 +1000,7 @@ fun SettingsScreen(
                             )
                         }
                         if (isSelected) {
-                            Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.Check, null, tint = LocalTurnlyColors.current.accent)
                         }
                     }
                 }
@@ -1087,7 +1037,7 @@ fun SettingsScreen(
                         Column {
                             Text(
                                 weight.label,
-                                style = MaterialTheme.typography.titleMedium.copy(
+                                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold).copy(
                                     fontFamily = AppleFontStyle.fromLabel(prefs.appFontFamily).fontFamily,
                                     fontWeight = weight.weight
                                 ),
@@ -1095,7 +1045,7 @@ fun SettingsScreen(
                             )
                             Text(
                                 "The quick brown fox jumps over the lazy dog",
-                                style = MaterialTheme.typography.bodySmall.copy(
+                                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal).copy(
                                     fontFamily = AppleFontStyle.fromLabel(prefs.appFontFamily).fontFamily,
                                     fontWeight = weight.weight
                                 ),
@@ -1103,7 +1053,7 @@ fun SettingsScreen(
                             )
                         }
                         if (isSelected) {
-                            Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.Check, null, tint = LocalTurnlyColors.current.accent)
                         }
                     }
                 }
@@ -1129,7 +1079,7 @@ fun SettingsScreen(
                         LiquidButton(
                             onClick = { viewModel.setFontTintFallbackMode(index) },
                             modifier = Modifier.weight(1f),
-                            surfaceColor = if (prefs.fontTintFallbackMode == index) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
+                            surfaceColor = if (prefs.fontTintFallbackMode == index) LocalTurnlyColors.current.accent.copy(alpha = 0.4f) else Color.Transparent,
                             backdrop = backdrop
                         ) {
                             Text(label, fontSize = 11.sp, fontWeight = FontWeight.Black, color = adaptiveColor)
@@ -1143,7 +1093,7 @@ fun SettingsScreen(
                     0 -> {
                         Text(
                             "Automatically derives readable text contrast from your active background wallpaper or liquid scene.",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                             color = adaptiveColor.copy(alpha = 0.7f),
                             lineHeight = 18.sp
                         )
@@ -1191,7 +1141,7 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(day.name.lowercase().replaceFirstChar { it.uppercase() }, color = adaptiveColor)
-                        if (isSelected) Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                        if (isSelected) Icon(Icons.Default.Check, null, tint = LocalTurnlyColors.current.accent)
                     }
                 }
             }
@@ -1280,9 +1230,9 @@ fun SettingsScreen(
                                 UpdateFrequency.WEEKLY -> "Check once every 7 days"
                                 UpdateFrequency.MONTHLY -> "Check once every 30 days"
                             }
-                            Text(desc, style = MaterialTheme.typography.bodySmall, color = adaptiveColor.copy(alpha = 0.6f))
+                            Text(desc, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.6f))
                         }
-                        if (isSelected) Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
+                        if (isSelected) Icon(Icons.Default.Check, null, tint = LocalTurnlyColors.current.accent)
                     }
                 }
             }
@@ -1323,7 +1273,7 @@ fun SettingsScreen(
                         val mb = state.updateInfo.assetSize / (1024f * 1024f)
                         Text(
                             text = String.format(Locale.ROOT, "Download size: %.1f MB", mb),
-                            style = MaterialTheme.typography.bodySmall,
+                            style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                             color = adaptiveColor.copy(alpha = 0.7f)
                         )
                     }
@@ -1339,7 +1289,7 @@ fun SettingsScreen(
                     ) {
                         Text(
                             text = state.updateInfo.releaseNotes.ifBlank { "No release notes provided." },
-                            style = MaterialTheme.typography.bodySmall,
+                            style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                             color = adaptiveColor
                         )
                     }
@@ -1372,7 +1322,7 @@ fun SettingsScreen(
                             val totalMb = state.totalBytes / (1024f * 1024f)
                             Text(
                                 String.format(Locale.ROOT, "%.1f / %.1f MB", currentMb, totalMb),
-                                style = MaterialTheme.typography.bodySmall,
+                                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal),
                                 color = adaptiveColor.copy(alpha = 0.6f)
                             )
                         }
@@ -1437,9 +1387,9 @@ fun SettingsScreen(
 fun SettingsSectionHeader(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleSmall,
+        style = androidx.compose.ui.text.TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Medium),
         fontWeight = FontWeight.Black,
-        color = MaterialTheme.colorScheme.primary,
+        color = LocalTurnlyColors.current.accent,
         modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
     )
 }
@@ -1465,9 +1415,9 @@ fun SettingsToggleItem(
             AdaptiveIcon(icon, modifier = Modifier.size(24.dp), tint = adaptiveColor.copy(alpha = 0.7f))
             Spacer(Modifier.width(16.dp))
             Column {
-                Text(title, style = MaterialTheme.typography.bodyLarge, color = adaptiveColor, fontWeight = FontWeight.SemiBold)
+                Text(title, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal), color = adaptiveColor, fontWeight = FontWeight.SemiBold)
                 if (subtitle != null) {
-                    Text(subtitle, style = MaterialTheme.typography.bodySmall, color = adaptiveColor.copy(alpha = 0.6f))
+                    Text(subtitle, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.6f))
                 }
             }
         }
@@ -1495,11 +1445,11 @@ fun SettingsNavigationItem(
         Row(verticalAlignment = Alignment.CenterVertically) {
             AdaptiveIcon(icon, modifier = Modifier.size(24.dp), tint = adaptiveColor.copy(alpha = 0.7f))
             Spacer(Modifier.width(16.dp))
-            Text(title, style = MaterialTheme.typography.bodyLarge, color = adaptiveColor, fontWeight = FontWeight.SemiBold)
+            Text(title, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal), color = adaptiveColor, fontWeight = FontWeight.SemiBold)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (value != null) {
-                Text(value, style = MaterialTheme.typography.bodyMedium, color = adaptiveColor.copy(alpha = 0.6f))
+                Text(value, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.6f))
                 Spacer(Modifier.width(8.dp))
             }
             AdaptiveIcon(Icons.AutoMirrored.Filled.KeyboardArrowRight, modifier = Modifier.size(24.dp), tint = adaptiveColor.copy(alpha = 0.3f))
@@ -1528,7 +1478,7 @@ fun GlassEffectSlider(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = MaterialTheme.typography.bodyMedium, color = adaptiveColor, fontWeight = FontWeight.Bold)
+                Text(title, style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal), color = adaptiveColor, fontWeight = FontWeight.Bold)
                 if (defaultValue != null && value != defaultValue) {
                     Spacer(Modifier.width(8.dp))
                     Icon(
@@ -1551,7 +1501,7 @@ fun GlassEffectSlider(
                 "ms" -> String.format(Locale.ROOT, "%d ms", value.toInt())
                 else -> String.format(Locale.ROOT, "%d", value.toInt())
             }
-            Text(displayValue, style = MaterialTheme.typography.bodySmall, color = adaptiveColor.copy(alpha = 0.6f))
+            Text(displayValue, style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.6f))
         }
         LiquidSlider(
             value = { value },

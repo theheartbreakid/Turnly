@@ -2,11 +2,21 @@ package com.crescentapps.turnly.presentation.screens.room
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +83,7 @@ fun RoomSettingsScreen(
 
             Text(
                 text = "Room Settings",
-                style = MaterialTheme.typography.titleMedium,
+                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                 fontWeight = FontWeight.Bold,
                 color = adaptiveColor
             )
@@ -109,14 +119,14 @@ fun RoomSettingsScreen(
                         )
                         Text(
                             text = room.name,
-                            style = MaterialTheme.typography.titleLarge,
+                            style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                             fontWeight = FontWeight.Bold,
                             color = adaptiveColor
                         )
                         if (room.description.isNotBlank()) {
                             Text(
                                 text = room.description,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                                 color = adaptiveColor.copy(alpha = 0.7f)
                             )
                         }

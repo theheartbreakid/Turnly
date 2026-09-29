@@ -4,6 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -11,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +41,6 @@ import com.crescentapps.turnly.presentation.theme.LiquidColors
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import java.time.LocalDate
-import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
@@ -143,7 +146,7 @@ fun CalendarHeader(viewModel: CalendarViewModel, uiState: CalendarUiState, backd
     val adaptiveColor = LocalPrismalAdaptiveColor.current
     val tokens = com.crescentapps.turnly.presentation.theme.TurnlyThemeTokens.colors
     val monthTitle = remember(uiState.currentMonth) {
-        val monthName = uiState.currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+        val monthName = uiState.currentMonth.month.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())
         "$monthName ${uiState.currentMonth.year}"
     }
 
@@ -155,7 +158,7 @@ fun CalendarHeader(viewModel: CalendarViewModel, uiState: CalendarUiState, backd
         Column {
             Text(
                 text = monthTitle,
-                style = MaterialTheme.typography.titleLarge,
+                style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold),
                 fontWeight = FontWeight.Black,
                 color = adaptiveColor
             )
@@ -172,8 +175,8 @@ fun CalendarHeader(viewModel: CalendarViewModel, uiState: CalendarUiState, backd
             LiquidButton(
                 onClick = { viewModel.jumpToToday() },
                 backdrop = backdrop,
-                surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.25f),
+                tint = LocalTurnlyColors.current.accent.copy(alpha = 0.4f)
             ) {
                 Text("Today", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = adaptiveColor)
             }
@@ -336,7 +339,7 @@ fun CalendarDayDetailPane(
         Column(modifier = Modifier.padding(18.dp)) {
             Text(
                 text = DateUtils.formatDisplay(DateUtils.format(uiState.selectedDate)),
-                style = MaterialTheme.typography.titleMedium,
+                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.SemiBold),
                 fontWeight = FontWeight.Bold,
                 color = tokens.primary
             )
@@ -346,7 +349,7 @@ fun CalendarDayDetailPane(
             if (uiState.selectedDayTurns.isEmpty()) {
                 Text(
                     text = "No rotations active on this day.",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Normal),
                     color = adaptiveColor.copy(alpha = 0.6f)
                 )
             } else {
@@ -404,7 +407,7 @@ fun CalendarDayDetailPane(
                                             text = CurrencyUtils.formatAmount(turn.expectedAmount, turn.schedule.currencyCode),
                                             fontWeight = FontWeight.SemiBold,
                                             fontSize = 13.sp,
-                                            color = MaterialTheme.colorScheme.primary
+                                            color = LocalTurnlyColors.current.accent
                                         )
                                     }
                                 }
@@ -421,8 +424,8 @@ fun CalendarDayDetailPane(
                                         onClick = { onMarkDone(turn) },
                                         backdrop = backdrop,
                                         modifier = Modifier.weight(1f),
-                                        surfaceColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f),
-                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                                        surfaceColor = LocalTurnlyColors.current.accent.copy(alpha = 0.25f),
+                                        tint = LocalTurnlyColors.current.accent.copy(alpha = 0.35f)
                                     ) {
                                         Text("Mark Done", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = tokens.primary)
                                     }

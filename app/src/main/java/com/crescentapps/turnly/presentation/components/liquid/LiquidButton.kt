@@ -3,10 +3,15 @@ package com.crescentapps.turnly.presentation.components.liquid
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.Image
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -20,6 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastCoerceAtMost
 import androidx.compose.ui.util.lerp
 import com.crescentapps.turnly.presentation.catalog.utils.InteractiveHighlight
@@ -197,7 +203,7 @@ fun LiquidButton(
         surfaceColor = surfaceColor
     ) {
         if (icon != null) {
-            Icon(
+            Image(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
@@ -207,7 +213,7 @@ fun LiquidButton(
         Text(
             text = text,
             fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.labelLarge
+            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
         )
     }
 }

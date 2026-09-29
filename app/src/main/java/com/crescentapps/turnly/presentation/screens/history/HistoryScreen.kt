@@ -2,12 +2,22 @@ package com.crescentapps.turnly.presentation.screens.history
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import com.crescentapps.turnly.presentation.components.HorizontalDivider
+import com.crescentapps.turnly.presentation.components.CircularProgressIndicator
+import com.crescentapps.turnly.presentation.components.LinearProgressIndicator
+import com.crescentapps.turnly.presentation.components.RadioButton
+import com.crescentapps.turnly.presentation.components.Checkbox
+
+import com.crescentapps.turnly.presentation.components.Text
+import com.crescentapps.turnly.presentation.components.Icon
+import com.crescentapps.turnly.presentation.theme.LocalTurnlyColors
+import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +56,7 @@ fun HistoryScreen(
 
         Text(
             text = "History & Records",
-            style = MaterialTheme.typography.headlineMedium,
+            style = TextStyle(fontSize = 28.sp, fontWeight = FontWeight.Bold),
             fontWeight = FontWeight.Black,
             color = adaptiveColor
         )
@@ -105,14 +115,14 @@ fun HistoryScreen(
                 LiquidChip(
                     onClick = { viewModel.filterByStatus(null) },
                     backdrop = backdrop,
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
-                    surfaceColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else colors.surface.copy(alpha = 0.08f)
+                    tint = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.4f) else Color.Transparent,
+                    surfaceColor = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.2f) else colors.surface.copy(alpha = 0.08f)
                 ) {
                     Text(
                         text = "All Statuses",
                         fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else adaptiveColor.copy(alpha = 0.8f)
+                        color = if (isSelected) LocalTurnlyColors.current.accent else adaptiveColor.copy(alpha = 0.8f)
                     )
                 }
             }
@@ -121,14 +131,14 @@ fun HistoryScreen(
                 LiquidChip(
                     onClick = { viewModel.filterByStatus(status) },
                     backdrop = backdrop,
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent,
-                    surfaceColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else colors.surface.copy(alpha = 0.08f)
+                    tint = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.4f) else Color.Transparent,
+                    surfaceColor = if (isSelected) LocalTurnlyColors.current.accent.copy(alpha = 0.2f) else colors.surface.copy(alpha = 0.08f)
                 ) {
                     Text(
                         text = status.displayName,
                         fontSize = 12.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else adaptiveColor.copy(alpha = 0.8f)
+                        color = if (isSelected) LocalTurnlyColors.current.accent else adaptiveColor.copy(alpha = 0.8f)
                     )
                 }
             }
