@@ -43,6 +43,12 @@ enum class OverrideStrategy(val displayName: String, val description: String) {
 }
 
 @Serializable
+enum class UiSystemMode(val displayName: String) {
+    GAUSSIAN_BLUR("GaussianBlur UI"),
+    LIQUID("Liquid UI")
+}
+
+@Serializable
 enum class ThemeMode {
     SYSTEM,
     LIGHT,

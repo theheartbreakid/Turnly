@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.crescentapps.turnly.core.model.FirstDayOfWeek
 import com.crescentapps.turnly.core.model.ThemeMode
+import com.crescentapps.turnly.core.model.UiSystemMode
 import com.crescentapps.turnly.core.model.UpdateFrequency
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,7 +20,27 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  */
 data class UserPreferences(
     // UI Visual System Mode
+    val uiSystemMode: UiSystemMode = UiSystemMode.GAUSSIAN_BLUR,
     val hasAcceptedLiquidWarning: Boolean = false,
+
+    // GaussianBlur Optics & Effects Settings
+    val isLiquidGlassEnabled: Boolean = true,
+    val gaussianBlurRadius: Float = 24f,
+    val gaussianSurfaceOpacity: Float = 0.40f,
+    val gaussianRefractionEnabled: Boolean = true,
+    val gaussianRefractionStrength: Float = 0.50f,
+    val gaussianDynamicHighlightsEnabled: Boolean = true,
+    val gaussianDynamicHighlightsIntensity: Float = 1.0f,
+    val gaussianSpecularEnabled: Boolean = true,
+    val gaussianSpecularIntensity: Float = 1.0f,
+    val gaussianCondensedLightEnabled: Boolean = true,
+    val gaussianCondensedLightRadius: Float = 48f,
+    val gaussianColorProjectionEnabled: Boolean = true,
+    val gaussianContactDepthEnabled: Boolean = true,
+    val gaussianProgressiveBlurEnabled: Boolean = true,
+    val gaussianMorphingEnabled: Boolean = true,
+    val gaussianGuidingLightEnabled: Boolean = true,
+    val gaussianVisualQuality: String = "BALANCED",
 
     // Appearance
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
@@ -137,6 +158,26 @@ class UserPreferencesRepository(private val context: Context) {
     }
 
     private object PreferencesKeys {
+        val UI_SYSTEM_MODE = stringPreferencesKey("ui_system_mode")
+
+        val IS_LIQUID_GLASS_ENABLED = booleanPreferencesKey("is_liquid_glass_enabled")
+        val GAUSSIAN_BLUR_RADIUS = floatPreferencesKey("gaussian_blur_radius")
+        val GAUSSIAN_SURFACE_OPACITY = floatPreferencesKey("gaussian_surface_opacity")
+        val GAUSSIAN_REFRACTION_ENABLED = booleanPreferencesKey("gaussian_refraction_enabled")
+        val GAUSSIAN_REFRACTION_STRENGTH = floatPreferencesKey("gaussian_refraction_strength")
+        val GAUSSIAN_DYNAMIC_HIGHLIGHTS_ENABLED = booleanPreferencesKey("gaussian_dynamic_highlights_enabled")
+        val GAUSSIAN_DYNAMIC_HIGHLIGHTS_INTENSITY = floatPreferencesKey("gaussian_dynamic_highlights_intensity")
+        val GAUSSIAN_SPECULAR_ENABLED = booleanPreferencesKey("gaussian_specular_enabled")
+        val GAUSSIAN_SPECULAR_INTENSITY = floatPreferencesKey("gaussian_specular_intensity")
+        val GAUSSIAN_CONDENSED_LIGHT_ENABLED = booleanPreferencesKey("gaussian_condensed_light_enabled")
+        val GAUSSIAN_CONDENSED_LIGHT_RADIUS = floatPreferencesKey("gaussian_condensed_light_radius")
+        val GAUSSIAN_COLOR_PROJECTION_ENABLED = booleanPreferencesKey("gaussian_color_projection_enabled")
+        val GAUSSIAN_CONTACT_DEPTH_ENABLED = booleanPreferencesKey("gaussian_contact_depth_enabled")
+        val GAUSSIAN_PROGRESSIVE_BLUR_ENABLED = booleanPreferencesKey("gaussian_progressive_blur_enabled")
+        val GAUSSIAN_MORPHING_ENABLED = booleanPreferencesKey("gaussian_morphing_enabled")
+        val GAUSSIAN_GUIDING_LIGHT_ENABLED = booleanPreferencesKey("gaussian_guiding_light_enabled")
+        val GAUSSIAN_VISUAL_QUALITY = stringPreferencesKey("gaussian_visual_quality")
+
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val IS_AMOLED = booleanPreferencesKey("is_amoled")
         val DYNAMIC_COLORS = booleanPreferencesKey("dynamic_colors")
@@ -204,6 +245,9 @@ class UserPreferencesRepository(private val context: Context) {
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = context.dataStore.data.map { preferences ->
+        val uiSystemStr = preferences[PreferencesKeys.UI_SYSTEM_MODE] ?: UiSystemMode.GAUSSIAN_BLUR.name
+        val uiSystem = runCatching { UiSystemMode.valueOf(uiSystemStr) }.getOrDefault(UiSystemMode.GAUSSIAN_BLUR)
+
         val hasAcceptedLiquid = preferences[PreferencesKeys.HAS_ACCEPTED_LIQUID_WARNING] ?: false
 
         val themeStr = preferences[PreferencesKeys.THEME_MODE] ?: ThemeMode.SYSTEM.name
@@ -218,7 +262,26 @@ class UserPreferencesRepository(private val context: Context) {
         }
 
         UserPreferences(
+            uiSystemMode = uiSystem,
             hasAcceptedLiquidWarning = hasAcceptedLiquid,
+
+            isLiquidGlassEnabled = preferences[PreferencesKeys.IS_LIQUID_GLASS_ENABLED] ?: true,
+            gaussianBlurRadius = (preferences[PreferencesKeys.GAUSSIAN_BLUR_RADIUS] ?: 24f).coerceIn(0f, 100f),
+            gaussianSurfaceOpacity = (preferences[PreferencesKeys.GAUSSIAN_SURFACE_OPACITY] ?: 0.40f).coerceIn(0f, 1f),
+            gaussianRefractionEnabled = preferences[PreferencesKeys.GAUSSIAN_REFRACTION_ENABLED] ?: true,
+            gaussianRefractionStrength = (preferences[PreferencesKeys.GAUSSIAN_REFRACTION_STRENGTH] ?: 0.50f).coerceIn(0f, 2f),
+            gaussianDynamicHighlightsEnabled = preferences[PreferencesKeys.GAUSSIAN_DYNAMIC_HIGHLIGHTS_ENABLED] ?: true,
+            gaussianDynamicHighlightsIntensity = (preferences[PreferencesKeys.GAUSSIAN_DYNAMIC_HIGHLIGHTS_INTENSITY] ?: 1.0f).coerceIn(0f, 2f),
+            gaussianSpecularEnabled = preferences[PreferencesKeys.GAUSSIAN_SPECULAR_ENABLED] ?: true,
+            gaussianSpecularIntensity = (preferences[PreferencesKeys.GAUSSIAN_SPECULAR_INTENSITY] ?: 1.0f).coerceIn(0f, 2f),
+            gaussianCondensedLightEnabled = preferences[PreferencesKeys.GAUSSIAN_CONDENSED_LIGHT_ENABLED] ?: true,
+            gaussianCondensedLightRadius = (preferences[PreferencesKeys.GAUSSIAN_CONDENSED_LIGHT_RADIUS] ?: 48f).coerceIn(10f, 200f),
+            gaussianColorProjectionEnabled = preferences[PreferencesKeys.GAUSSIAN_COLOR_PROJECTION_ENABLED] ?: true,
+            gaussianContactDepthEnabled = preferences[PreferencesKeys.GAUSSIAN_CONTACT_DEPTH_ENABLED] ?: true,
+            gaussianProgressiveBlurEnabled = preferences[PreferencesKeys.GAUSSIAN_PROGRESSIVE_BLUR_ENABLED] ?: true,
+            gaussianMorphingEnabled = preferences[PreferencesKeys.GAUSSIAN_MORPHING_ENABLED] ?: true,
+            gaussianGuidingLightEnabled = preferences[PreferencesKeys.GAUSSIAN_GUIDING_LIGHT_ENABLED] ?: true,
+            gaussianVisualQuality = preferences[PreferencesKeys.GAUSSIAN_VISUAL_QUALITY] ?: "BALANCED",
             themeMode = theme,
             isAmoled = preferences[PreferencesKeys.IS_AMOLED] ?: false,
             dynamicColors = preferences[PreferencesKeys.DYNAMIC_COLORS] ?: true,
@@ -285,6 +348,78 @@ class UserPreferencesRepository(private val context: Context) {
             }.getOrDefault(UpdateFrequency.DAILY),
             lastUpdateCheckTimestamp = preferences[PreferencesKeys.LAST_UPDATE_CHECK_TIMESTAMP] ?: 0L
         )
+    }
+
+    suspend fun setUiSystemMode(mode: UiSystemMode) {
+        context.dataStore.edit { it[PreferencesKeys.UI_SYSTEM_MODE] = mode.name }
+    }
+
+    suspend fun setLiquidGlassEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.IS_LIQUID_GLASS_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianBlurRadius(radius: Float) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_BLUR_RADIUS] = radius.coerceIn(0f, 100f) }
+    }
+
+    suspend fun setGaussianSurfaceOpacity(opacity: Float) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_SURFACE_OPACITY] = opacity.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setGaussianRefractionEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_REFRACTION_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianRefractionStrength(strength: Float) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_REFRACTION_STRENGTH] = strength.coerceIn(0f, 2f) }
+    }
+
+    suspend fun setGaussianDynamicHighlightsEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_DYNAMIC_HIGHLIGHTS_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianDynamicHighlightsIntensity(intensity: Float) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_DYNAMIC_HIGHLIGHTS_INTENSITY] = intensity.coerceIn(0f, 2f) }
+    }
+
+    suspend fun setGaussianSpecularEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_SPECULAR_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianSpecularIntensity(intensity: Float) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_SPECULAR_INTENSITY] = intensity.coerceIn(0f, 2f) }
+    }
+
+    suspend fun setGaussianCondensedLightEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_CONDENSED_LIGHT_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianCondensedLightRadius(radius: Float) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_CONDENSED_LIGHT_RADIUS] = radius.coerceIn(10f, 200f) }
+    }
+
+    suspend fun setGaussianColorProjectionEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_COLOR_PROJECTION_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianContactDepthEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_CONTACT_DEPTH_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianProgressiveBlurEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_PROGRESSIVE_BLUR_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianMorphingEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_MORPHING_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianGuidingLightEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_GUIDING_LIGHT_ENABLED] = enabled }
+    }
+
+    suspend fun setGaussianVisualQuality(quality: String) {
+        context.dataStore.edit { it[PreferencesKeys.GAUSSIAN_VISUAL_QUALITY] = quality }
     }
 
     suspend fun setHasAcceptedLiquidWarning(accepted: Boolean) {

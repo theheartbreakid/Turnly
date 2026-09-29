@@ -22,8 +22,9 @@ fun BackdropEffectScope.liquidLens(
     if (!isRuntimeShaderSupported()) return
     if (refractionHeight <= 0f || refractionAmount <= 0f) return
 
-    if (padding > 0f) {
-        padding = (padding - refractionHeight).fastCoerceAtLeast(0f)
+    val requiredPadding = refractionAmount * 1.5f
+    if (padding < requiredPadding) {
+        padding = requiredPadding
     }
 
     val cornerRadii = cornerRadii

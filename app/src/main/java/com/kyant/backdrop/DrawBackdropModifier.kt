@@ -23,6 +23,7 @@ import androidx.compose.ui.node.LayoutModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.observeReads
+import androidx.compose.ui.node.requireLayoutCoordinates
 import androidx.compose.ui.node.requireGraphicsContext
 import androidx.compose.ui.platform.InspectorInfo
 import androidx.compose.ui.unit.Constraints
@@ -257,8 +258,6 @@ private class DrawBackdropNode(
         compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
     }
 
-    private var layoutCoordinates: LayoutCoordinates? by mutableStateOf(null, neverEqualPolicy())
-
     private var padding by mutableFloatStateOf(0f)
 
     private val recordBackdropBlock: (DrawScope.() -> Unit) = {
@@ -272,7 +271,7 @@ private class DrawBackdropNode(
             with(backdrop) {
                 drawBackdrop(
                     density = effectScope,
-                    coordinates = layoutCoordinates,
+                    coordinates = if (backdrop.isCoordinatesDependent && isAttached) runCatching { requireLayoutCoordinates() }.getOrNull() else null,
                     layerBlock = layerBlock
                 )
             }
@@ -336,13 +335,6 @@ private class DrawBackdropNode(
 
     override fun onGloballyPositioned(coordinates: LayoutCoordinates) {
         if (coordinates.isAttached) {
-            if (backdrop.isCoordinatesDependent) {
-                layoutCoordinates = coordinates
-            } else {
-                if (layoutCoordinates != null) {
-                    layoutCoordinates = null
-                }
-            }
             exportedBackdrop?.layerCoordinates = coordinates
         }
     }
@@ -382,7 +374,6 @@ private class DrawBackdropNode(
         }
 
         effectScope.reset()
-        layoutCoordinates = null
         exportedBackdrop?.layerCoordinates = null
     }
 }

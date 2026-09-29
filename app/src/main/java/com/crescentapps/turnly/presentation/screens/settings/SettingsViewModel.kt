@@ -85,8 +85,80 @@ class SettingsViewModel(
     }
 
     // UI Visual System Mode
+    fun setUiSystemMode(mode: UiSystemMode) {
+        viewModelScope.launch { preferencesRepository.setUiSystemMode(mode) }
+    }
+
     fun setHasAcceptedLiquidWarning(accepted: Boolean) {
         viewModelScope.launch { preferencesRepository.setHasAcceptedLiquidWarning(accepted) }
+    }
+
+    fun setLiquidGlassEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setLiquidGlassEnabled(enabled) }
+    }
+
+    fun setGaussianBlurRadius(radius: Float) {
+        viewModelScope.launch { preferencesRepository.setGaussianBlurRadius(radius) }
+    }
+
+    fun setGaussianSurfaceOpacity(opacity: Float) {
+        viewModelScope.launch { preferencesRepository.setGaussianSurfaceOpacity(opacity) }
+    }
+
+    fun setGaussianRefractionEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianRefractionEnabled(enabled) }
+    }
+
+    fun setGaussianRefractionStrength(strength: Float) {
+        viewModelScope.launch { preferencesRepository.setGaussianRefractionStrength(strength) }
+    }
+
+    fun setGaussianDynamicHighlightsEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianDynamicHighlightsEnabled(enabled) }
+    }
+
+    fun setGaussianDynamicHighlightsIntensity(intensity: Float) {
+        viewModelScope.launch { preferencesRepository.setGaussianDynamicHighlightsIntensity(intensity) }
+    }
+
+    fun setGaussianSpecularEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianSpecularEnabled(enabled) }
+    }
+
+    fun setGaussianSpecularIntensity(intensity: Float) {
+        viewModelScope.launch { preferencesRepository.setGaussianSpecularIntensity(intensity) }
+    }
+
+    fun setGaussianCondensedLightEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianCondensedLightEnabled(enabled) }
+    }
+
+    fun setGaussianCondensedLightRadius(radius: Float) {
+        viewModelScope.launch { preferencesRepository.setGaussianCondensedLightRadius(radius) }
+    }
+
+    fun setGaussianColorProjectionEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianColorProjectionEnabled(enabled) }
+    }
+
+    fun setGaussianContactDepthEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianContactDepthEnabled(enabled) }
+    }
+
+    fun setGaussianProgressiveBlurEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianProgressiveBlurEnabled(enabled) }
+    }
+
+    fun setGaussianMorphingEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianMorphingEnabled(enabled) }
+    }
+
+    fun setGaussianGuidingLightEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setGaussianGuidingLightEnabled(enabled) }
+    }
+
+    fun setGaussianVisualQuality(quality: String) {
+        viewModelScope.launch { preferencesRepository.setGaussianVisualQuality(quality) }
     }
 
     // Appearance

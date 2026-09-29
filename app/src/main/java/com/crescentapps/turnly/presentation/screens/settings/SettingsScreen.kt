@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crescentapps.turnly.core.model.FirstDayOfWeek
 import com.crescentapps.turnly.core.model.ThemeMode
+import com.crescentapps.turnly.core.model.UiSystemMode
 import com.crescentapps.turnly.data.preferences.UserPreferencesRepository
 import com.crescentapps.turnly.presentation.catalog.utils.LocalBackdrop
 import com.crescentapps.turnly.presentation.components.AdaptiveIcon
@@ -85,6 +86,7 @@ fun SettingsScreen(
     val isWide = sizeDetails.widthClass == com.crescentapps.turnly.presentation.components.AppWindowWidthSizeClass.EXPANDED
 
     // Dialog visibility states
+    var showUiSystemDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
     var showFontTintDialog by remember { mutableStateOf(false) }
     var showFontFamilyDialog by remember { mutableStateOf(false) }
@@ -197,6 +199,19 @@ fun SettingsScreen(
             }
 
             // UI STYLE / MODE SELECTION
+            item(key = "header_ui_system") { SettingsSectionHeader("UI System Mode") }
+            item(key = "card_ui_system") {
+                LiquidCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(24.dp), backdrop = backdrop) {
+                    Column {
+                        SettingsNavigationItem(
+                            title = "Active UI System",
+                            value = prefs.uiSystemMode.displayName,
+                            icon = Icons.Outlined.Dashboard
+                        ) { showUiSystemDialog = true }
+                    }
+                }
+            }
+
             // APPEARANCE SECTION
             item(key = "header_appearance") { SettingsSectionHeader("Appearance") }
             item(key = "card_appearance") {
@@ -920,6 +935,53 @@ fun SettingsScreen(
             item { Spacer(modifier = Modifier.height(100.dp)) }
         }
     }
+    }
+
+    // UI System Mode Dialog
+    if (showUiSystemDialog) {
+        LiquidDialog(
+            onDismissRequest = { showUiSystemDialog = false },
+            backdrop = backdrop,
+            title = "Select UI Visual System",
+            positiveText = "Done",
+            negativeText = null,
+            onPositive = { showUiSystemDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(UiSystemMode.GAUSSIAN_BLUR, UiSystemMode.LIQUID).forEach { mode ->
+                    val isSelected = prefs.uiSystemMode == mode
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isSelected) adaptiveColor.copy(alpha = 0.1f) else Color.Transparent)
+                            .clickable {
+                                viewModel.setUiSystemMode(mode)
+                                showUiSystemDialog = false
+                            }
+                            .padding(vertical = 12.dp, horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                mode.displayName,
+                                color = adaptiveColor,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            )
+                            val desc = when (mode) {
+                                UiSystemMode.GAUSSIAN_BLUR -> "BitChord-inspired physical glass with real backdrop blur"
+                                UiSystemMode.LIQUID -> "Prismal OpenGL shader liquid glass"
+                            }
+                            Text(desc, style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.6f))
+                        }
+                        if (isSelected) {
+                            Icon(Icons.Default.Check, null, tint = LocalTurnlyColors.current.accent)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Theme Mode Dialog
