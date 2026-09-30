@@ -57,6 +57,14 @@ data class UserPreferences(
     // Material 3 Expressive Settings
     val m3DynamicColor: Boolean = true,
     val m3UseExpressiveMotion: Boolean = true,
+    val m3ColorPersonality: String = "BALANCED",
+    val m3ColorIntensity: Float = 1.0f,
+    val m3Contrast: String = "STANDARD",
+    val m3TypographyStyle: String = "SYSTEM",
+    val m3TypographyEmphasis: String = "EXPRESSIVE",
+    val m3Density: String = "STANDARD",
+    val m3ShapePersonality: String = "EXPRESSIVE",
+    val m3ShapeVariation: String = "MEDIUM",
 
     // Typography
     val appFontFamily: String = "SF Pro Text",
@@ -195,6 +203,14 @@ class UserPreferencesRepository(private val context: Context) {
 
         val M3_DYNAMIC_COLOR = booleanPreferencesKey("m3_dynamic_color")
         val M3_USE_EXPRESSIVE_MOTION = booleanPreferencesKey("m3_use_expressive_motion")
+        val M3_COLOR_PERSONALITY = stringPreferencesKey("m3_color_personality")
+        val M3_COLOR_INTENSITY = floatPreferencesKey("m3_color_intensity")
+        val M3_CONTRAST = stringPreferencesKey("m3_contrast")
+        val M3_TYPOGRAPHY_STYLE = stringPreferencesKey("m3_typography_style")
+        val M3_TYPOGRAPHY_EMPHASIS = stringPreferencesKey("m3_typography_emphasis")
+        val M3_DENSITY = stringPreferencesKey("m3_density")
+        val M3_SHAPE_PERSONALITY = stringPreferencesKey("m3_shape_personality")
+        val M3_SHAPE_VARIATION = stringPreferencesKey("m3_shape_variation")
 
         val APP_FONT_FAMILY = stringPreferencesKey("app_font_family")
         val APP_FONT_WEIGHT = stringPreferencesKey("app_font_weight")
@@ -302,6 +318,14 @@ class UserPreferencesRepository(private val context: Context) {
 
             m3DynamicColor = preferences[PreferencesKeys.M3_DYNAMIC_COLOR] ?: true,
             m3UseExpressiveMotion = preferences[PreferencesKeys.M3_USE_EXPRESSIVE_MOTION] ?: true,
+            m3ColorPersonality = preferences[PreferencesKeys.M3_COLOR_PERSONALITY] ?: "BALANCED",
+            m3ColorIntensity = (preferences[PreferencesKeys.M3_COLOR_INTENSITY] ?: 1.0f).coerceIn(0f, 1f),
+            m3Contrast = preferences[PreferencesKeys.M3_CONTRAST] ?: "STANDARD",
+            m3TypographyStyle = preferences[PreferencesKeys.M3_TYPOGRAPHY_STYLE] ?: "SYSTEM",
+            m3TypographyEmphasis = preferences[PreferencesKeys.M3_TYPOGRAPHY_EMPHASIS] ?: "EXPRESSIVE",
+            m3Density = preferences[PreferencesKeys.M3_DENSITY] ?: "STANDARD",
+            m3ShapePersonality = preferences[PreferencesKeys.M3_SHAPE_PERSONALITY] ?: "EXPRESSIVE",
+            m3ShapeVariation = preferences[PreferencesKeys.M3_SHAPE_VARIATION] ?: "MEDIUM",
 
             appFontFamily = preferences[PreferencesKeys.APP_FONT_FAMILY] ?: Defaults.DEFAULT_FONT_FAMILY,
             appFontWeight = preferences[PreferencesKeys.APP_FONT_WEIGHT] ?: Defaults.DEFAULT_FONT_WEIGHT,
@@ -478,6 +502,38 @@ class UserPreferencesRepository(private val context: Context) {
 
     suspend fun setM3UseExpressiveMotion(enabled: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.M3_USE_EXPRESSIVE_MOTION] = enabled }
+    }
+
+    suspend fun setM3ColorPersonality(personality: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_COLOR_PERSONALITY] = personality }
+    }
+
+    suspend fun setM3ColorIntensity(intensity: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_COLOR_INTENSITY] = intensity.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setM3Contrast(contrast: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_CONTRAST] = contrast }
+    }
+
+    suspend fun setM3TypographyStyle(style: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_TYPOGRAPHY_STYLE] = style }
+    }
+
+    suspend fun setM3TypographyEmphasis(emphasis: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_TYPOGRAPHY_EMPHASIS] = emphasis }
+    }
+
+    suspend fun setM3Density(density: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_DENSITY] = density }
+    }
+
+    suspend fun setM3ShapePersonality(personality: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_SHAPE_PERSONALITY] = personality }
+    }
+
+    suspend fun setM3ShapeVariation(variation: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_SHAPE_VARIATION] = variation }
     }
 
     suspend fun setAppFontFamily(family: String) {

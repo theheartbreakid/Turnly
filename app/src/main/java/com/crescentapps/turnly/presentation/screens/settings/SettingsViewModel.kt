@@ -206,6 +206,38 @@ class SettingsViewModel(
         viewModelScope.launch { preferencesRepository.setM3UseExpressiveMotion(enabled) }
     }
 
+    fun updateM3ColorPersonality(personality: String) {
+        viewModelScope.launch { preferencesRepository.setM3ColorPersonality(personality) }
+    }
+
+    fun updateM3ColorIntensity(intensity: Float) {
+        viewModelScope.launch { preferencesRepository.setM3ColorIntensity(intensity) }
+    }
+
+    fun updateM3Contrast(contrast: String) {
+        viewModelScope.launch { preferencesRepository.setM3Contrast(contrast) }
+    }
+
+    fun updateM3TypographyStyle(style: String) {
+        viewModelScope.launch { preferencesRepository.setM3TypographyStyle(style) }
+    }
+
+    fun updateM3TypographyEmphasis(emphasis: String) {
+        viewModelScope.launch { preferencesRepository.setM3TypographyEmphasis(emphasis) }
+    }
+
+    fun updateM3Density(density: String) {
+        viewModelScope.launch { preferencesRepository.setM3Density(density) }
+    }
+
+    fun updateM3ShapePersonality(personality: String) {
+        viewModelScope.launch { preferencesRepository.setM3ShapePersonality(personality) }
+    }
+
+    fun updateM3ShapeVariation(variation: String) {
+        viewModelScope.launch { preferencesRepository.setM3ShapeVariation(variation) }
+    }
+
     // Typography
     fun setAppFontFamily(family: String) {
         viewModelScope.launch { preferencesRepository.setAppFontFamily(family) }

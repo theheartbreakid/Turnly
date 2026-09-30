@@ -3,19 +3,25 @@ package com.crescentapps.turnly.presentation.m3expressive.screens.room
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.crescentapps.turnly.core.model.SyncState
-import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveCard
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveButton
+import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveCard
 import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveTokens
 import com.crescentapps.turnly.presentation.screens.room.RoomViewModel
 
@@ -32,89 +38,221 @@ fun M3RoomsScreen(
     Scaffold(
         topBar = {
             LargeTopAppBar(
-                title = { Text("Rooms") },
+                title = { 
+                    Text(
+                        "Rooms",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 actions = {
-                    TurnlyExpressiveButton(
+                    FilledTonalButton(
                         onClick = onJoinRoom,
-                        text = "Join",
-                        icon = { Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null) },
-                        isPrimary = false
-                    )
+                        shape = CircleShape,
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Login,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Join", fontWeight = FontWeight.Bold)
+                    }
                 }
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onCreateRoom) {
-                Icon(Icons.Default.Add, contentDescription = "Create Room")
-            }
+            ExtendedFloatingActionButton(
+                onClick = onCreateRoom,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text("New Room", fontWeight = FontWeight.Bold) },
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     ) { padding ->
         if (uiState.rooms.isEmpty()) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.Group,
-                        contentDescription = null,
-                        modifier = Modifier.size(ExpressiveTokens.spacing.hero),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
-                    Spacer(Modifier.height(ExpressiveTokens.spacing.normal))
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    // Expressive Illustration Container
+                    Surface(
+                        shape = RoundedCornerShape(48.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                        modifier = Modifier.size(160.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Group,
+                                contentDescription = null,
+                                modifier = Modifier.size(80.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(28.dp))
+
                     Text(
-                        "No P2P Rooms Connected",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = "No P2P Rooms Connected",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center
                     )
-                    Spacer(Modifier.height(ExpressiveTokens.spacing.small))
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     Text(
-                        "Sync schedules with family using room codes.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "Sync schedules with family using room codes.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
                     )
+
+                    Spacer(modifier = Modifier.height(28.dp))
+
+                    Button(
+                        onClick = onJoinRoom,
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .fillMaxWidth(0.6f)
+                            .height(48.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Login,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Join Room",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         } else {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(ExpressiveTokens.spacing.normal),
-                verticalArrangement = Arrangement.spacedBy(ExpressiveTokens.spacing.component)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(
+                    start = ExpressiveTokens.spacing.normal,
+                    end = ExpressiveTokens.spacing.normal,
+                    top = ExpressiveTokens.spacing.small,
+                    bottom = 100.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(uiState.rooms) { room ->
                     TurnlyExpressiveCard(
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                        ),
                         onClick = { onRoomClick(room.id) }
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(ExpressiveTokens.spacing.normal),
+                                .padding(20.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Text(text = room.name, style = MaterialTheme.typography.titleMedium)
-                                Spacer(Modifier.height(ExpressiveTokens.spacing.micro))
-                                Text(
-                                    text = "Code: ${room.roomCode} · ${room.role.name.lowercase().replaceFirstChar { it.uppercase() }}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Default.Group,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp),
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                Column {
+                                    Text(
+                                        text = room.name,
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "Code: ${room.roomCode} • ${room.role.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            val (syncText, syncBg, syncFg) = when (room.syncState) {
+                                SyncState.SYNCED -> Triple(
+                                    "Synced",
+                                    MaterialTheme.colorScheme.primaryContainer,
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                SyncState.SYNCING -> Triple(
+                                    "Syncing",
+                                    MaterialTheme.colorScheme.secondaryContainer,
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                SyncState.OFFLINE -> Triple(
+                                    "Offline",
+                                    MaterialTheme.colorScheme.errorContainer,
+                                    MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                SyncState.CONFLICT -> Triple(
+                                    "Conflict",
+                                    MaterialTheme.colorScheme.errorContainer,
+                                    MaterialTheme.colorScheme.onErrorContainer
                                 )
                             }
-                            
-                            val (syncText, syncColor) = when (room.syncState) {
-                                SyncState.SYNCED -> "Synced" to MaterialTheme.colorScheme.primary
-                                SyncState.SYNCING -> "Syncing" to MaterialTheme.colorScheme.secondary
-                                SyncState.OFFLINE -> "Offline" to MaterialTheme.colorScheme.error
-                                SyncState.CONFLICT -> "Conflict" to MaterialTheme.colorScheme.error
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Surface(
+                                    shape = CircleShape,
+                                    color = syncBg
+                                ) {
+                                    Text(
+                                        text = syncText,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = syncFg,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    )
+                                }
+
+                                IconButton(onClick = { onRoomClick(room.id) }) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "Room Options",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
-                            
-                            AssistChip(
-                                onClick = {},
-                                label = { Text(syncText) },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    labelColor = syncColor,
-                                    leadingIconContentColor = syncColor
-                                )
-                            )
                         }
                     }
                 }

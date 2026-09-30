@@ -1,8 +1,10 @@
 package com.crescentapps.turnly.presentation.m3expressive.components
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
@@ -12,7 +14,7 @@ import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveShapes
 @Composable
 fun TurnlyExpressiveCard(
     modifier: Modifier = Modifier,
-    shape: Shape = ExpressiveShapes.ExtraLarge, // L-increased or XL for large interactions
+    shape: Shape = ExpressiveShapes.ExtraLarge,
     colors: CardColors = CardDefaults.cardColors(),
     elevation: CardElevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     onClick: (() -> Unit)? = null,
@@ -63,7 +65,7 @@ fun TurnlyExpressiveButton(
             onClick = onClick, 
             modifier = modifier, 
             colors = colors,
-            shape = ExpressiveShapes.Full // Pill shape by default
+            shape = ExpressiveShapes.Full
         ) {
             if (icon != null) {
                 icon()
@@ -76,7 +78,7 @@ fun TurnlyExpressiveButton(
             onClick = onClick, 
             modifier = modifier, 
             colors = colors,
-            shape = ExpressiveShapes.Full // Pill shape by default
+            shape = ExpressiveShapes.Full
         ) {
             if (icon != null) {
                 icon()
@@ -85,4 +87,46 @@ fun TurnlyExpressiveButton(
             Text(text)
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun TurnlyExpressiveSplitButton(
+    onPrimaryClick: () -> Unit,
+    onSecondaryClick: () -> Unit,
+    primaryText: String,
+    modifier: Modifier = Modifier,
+    primaryIcon: (@Composable () -> Unit)? = null
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Button(
+            onClick = onPrimaryClick,
+            shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 4.dp, bottomEnd = 4.dp)
+        ) {
+            if (primaryIcon != null) {
+                primaryIcon()
+                Spacer(Modifier.width(ExpressiveTokens.spacing.small))
+            }
+            Text(primaryText)
+        }
+        Spacer(Modifier.width(2.dp))
+        FilledTonalButton(
+            onClick = onSecondaryClick,
+            shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 24.dp, bottomEnd = 24.dp),
+            contentPadding = PaddingValues(horizontal = 12.dp)
+        ) {
+            Text("▼")
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun TurnlyExpressiveLoadingIndicator(
+    modifier: Modifier = Modifier
+) {
+    LoadingIndicator(modifier = modifier)
 }

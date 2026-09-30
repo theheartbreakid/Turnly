@@ -2,42 +2,35 @@ package com.crescentapps.turnly.presentation.m3expressive
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.*
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
+import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.crescentapps.turnly.TurnlyApplication
+import com.crescentapps.turnly.core.model.Schedule
 import com.crescentapps.turnly.core.model.ThemeMode
 import com.crescentapps.turnly.data.preferences.UserPreferences
-import com.crescentapps.turnly.presentation.m3expressive.theme.TurnlyExpressiveTheme
-import com.crescentapps.turnly.presentation.m3expressive.screens.home.M3HomeScreen
-import com.crescentapps.turnly.presentation.m3expressive.screens.settings.M3SettingsScreen
+import com.crescentapps.turnly.presentation.m3expressive.navigation.M3ExpressiveDock
 import com.crescentapps.turnly.presentation.m3expressive.screens.calendar.M3CalendarScreen
-import com.crescentapps.turnly.presentation.m3expressive.screens.schedule.M3SchedulesScreen
-import com.crescentapps.turnly.presentation.m3expressive.screens.room.M3RoomsScreen
 import com.crescentapps.turnly.presentation.m3expressive.screens.history.M3HistoryScreen
+import com.crescentapps.turnly.presentation.m3expressive.screens.home.M3HomeScreen
+import com.crescentapps.turnly.presentation.m3expressive.screens.room.M3RoomsScreen
 import com.crescentapps.turnly.presentation.m3expressive.screens.schedule.M3CreateScheduleScreen
+import com.crescentapps.turnly.presentation.m3expressive.screens.schedule.M3SchedulesScreen
+import com.crescentapps.turnly.presentation.m3expressive.screens.settings.M3SettingsScreen
+import com.crescentapps.turnly.presentation.m3expressive.theme.TurnlyExpressiveTheme
 import com.crescentapps.turnly.presentation.navigation.Screen
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Group
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.crescentapps.turnly.presentation.screens.calendar.CalendarViewModel
-import com.crescentapps.turnly.core.model.Schedule
-import com.crescentapps.turnly.presentation.screens.home.HomeViewModel
-import com.crescentapps.turnly.presentation.screens.settings.SettingsViewModel
-import com.crescentapps.turnly.presentation.screens.room.RoomViewModel
 import com.crescentapps.turnly.presentation.screens.history.HistoryViewModel
+import com.crescentapps.turnly.presentation.screens.home.HomeViewModel
+import com.crescentapps.turnly.presentation.screens.room.RoomViewModel
 import com.crescentapps.turnly.presentation.screens.schedule.ScheduleFormViewModel
+import com.crescentapps.turnly.presentation.screens.settings.SettingsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Material3ExpressiveApp(
     app: TurnlyApplication,
@@ -54,56 +47,49 @@ fun Material3ExpressiveApp(
     TurnlyExpressiveTheme(
         isDark = isDark,
         dynamicColor = prefs.m3DynamicColor,
-        useExpressiveMotion = prefs.m3UseExpressiveMotion && !prefs.isReduceMotion
+        useExpressiveMotion = prefs.m3UseExpressiveMotion && !prefs.isReduceMotion,
+        prefs = prefs
     ) {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                item(
-                    icon = { Icon(Icons.Default.Home, contentDescription = "Today") },
-                    label = { Text("Today") },
-                    selected = currentRoute == Screen.Home.route,
-                    onClick = { navController.navigate(Screen.Home.route) { popUpTo(Screen.Home.route); launchSingleTop = true } }
-                )
-                item(
-                    icon = { Icon(Icons.Default.DateRange, contentDescription = "Calendar") },
-                    label = { Text("Calendar") },
-                    selected = currentRoute == Screen.Calendar.route,
-                    onClick = { navController.navigate(Screen.Calendar.route) { popUpTo(Screen.Home.route); launchSingleTop = true } }
-                )
-                item(
-                    icon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Schedules") },
-                    label = { Text("Schedules") },
-                    selected = currentRoute == Screen.Schedules.route,
-                    onClick = { navController.navigate(Screen.Schedules.route) { popUpTo(Screen.Home.route); launchSingleTop = true } }
-                )
-                item(
-                    icon = { Icon(Icons.Default.Group, contentDescription = "Rooms") },
-                    label = { Text("Rooms") },
-                    selected = currentRoute == Screen.Rooms.route,
-                    onClick = { navController.navigate(Screen.Rooms.route) { popUpTo(Screen.Home.route); launchSingleTop = true } }
-                )
-                item(
-                    icon = { Icon(Icons.Default.History, contentDescription = "History") },
-                    label = { Text("History") },
-                    selected = currentRoute == Screen.History.route,
-                    onClick = { navController.navigate(Screen.History.route) { popUpTo(Screen.Home.route); launchSingleTop = true } }
-                )
-                item(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text("Settings") },
-                    selected = currentRoute == Screen.Settings.route,
-                    onClick = { navController.navigate(Screen.Settings.route) { popUpTo(Screen.Home.route); launchSingleTop = true } }
-                )
-            }
-        ) {
+        // Main top-level routes that show the floating dock
+        val mainRoutes = listOf(
+            Screen.Home.route,
+            Screen.Calendar.route,
+            Screen.Schedules.route,
+            Screen.Rooms.route,
+            Screen.History.route,
+            Screen.Settings.route
+        )
+        val showDock = currentRoute in mainRoutes
+
+        Scaffold(
+            bottomBar = {
+                if (showDock) {
+                    M3ExpressiveDock(
+                        currentRoute = currentRoute,
+                        onNavigate = { destination ->
+                            navController.navigate(destination.route) {
+                                popUpTo(Screen.Home.route) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.background
+        ) { innerPadding ->
             NavHost(
                 navController = navController,
                 startDestination = Screen.Home.route,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = if (showDock) innerPadding.calculateBottomPadding() else ScaffoldDefaults.contentWindowInsets.asPaddingValues().calculateBottomPadding())
             ) {
                 composable(Screen.Home.route) {
                     val homeViewModel: HomeViewModel = viewModel { HomeViewModel(app.repository, app.roomRepository) }
