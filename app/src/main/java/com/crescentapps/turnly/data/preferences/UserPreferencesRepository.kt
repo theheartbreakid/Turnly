@@ -54,6 +54,10 @@ data class UserPreferences(
     val glassIntensity: Float = 1.0f,
     val isReduceMotion: Boolean = false,
 
+    // Material 3 Expressive Settings
+    val m3DynamicColor: Boolean = true,
+    val m3UseExpressiveMotion: Boolean = true,
+
     // Typography
     val appFontFamily: String = "SF Pro Text",
     val appFontWeight: String = "Regular",
@@ -189,6 +193,9 @@ class UserPreferencesRepository(private val context: Context) {
         val GLASS_INTENSITY = floatPreferencesKey("glass_intensity")
         val IS_REDUCE_MOTION = booleanPreferencesKey("is_reduce_motion")
 
+        val M3_DYNAMIC_COLOR = booleanPreferencesKey("m3_dynamic_color")
+        val M3_USE_EXPRESSIVE_MOTION = booleanPreferencesKey("m3_use_expressive_motion")
+
         val APP_FONT_FAMILY = stringPreferencesKey("app_font_family")
         val APP_FONT_WEIGHT = stringPreferencesKey("app_font_weight")
         val APP_FONT_TILT = booleanPreferencesKey("app_font_tilt")
@@ -292,6 +299,9 @@ class UserPreferencesRepository(private val context: Context) {
             fontTintCustomColor = preferences[PreferencesKeys.FONT_TINT_CUSTOM_COLOR] ?: 0xFF6366F1.toInt(),
             glassIntensity = (preferences[PreferencesKeys.GLASS_INTENSITY] ?: Defaults.DEFAULT_GLASS_INTENSITY).coerceIn(0f, 1f),
             isReduceMotion = preferences[PreferencesKeys.IS_REDUCE_MOTION] ?: false,
+
+            m3DynamicColor = preferences[PreferencesKeys.M3_DYNAMIC_COLOR] ?: true,
+            m3UseExpressiveMotion = preferences[PreferencesKeys.M3_USE_EXPRESSIVE_MOTION] ?: true,
 
             appFontFamily = preferences[PreferencesKeys.APP_FONT_FAMILY] ?: Defaults.DEFAULT_FONT_FAMILY,
             appFontWeight = preferences[PreferencesKeys.APP_FONT_WEIGHT] ?: Defaults.DEFAULT_FONT_WEIGHT,
@@ -460,6 +470,14 @@ class UserPreferencesRepository(private val context: Context) {
 
     suspend fun setReduceMotion(enabled: Boolean) {
         context.dataStore.edit { it[PreferencesKeys.IS_REDUCE_MOTION] = enabled }
+    }
+
+    suspend fun setM3DynamicColor(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.M3_DYNAMIC_COLOR] = enabled }
+    }
+
+    suspend fun setM3UseExpressiveMotion(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.M3_USE_EXPRESSIVE_MOTION] = enabled }
     }
 
     suspend fun setAppFontFamily(family: String) {

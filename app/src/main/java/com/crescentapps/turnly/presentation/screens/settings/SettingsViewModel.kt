@@ -198,6 +198,14 @@ class SettingsViewModel(
         viewModelScope.launch { preferencesRepository.setReduceMotion(enabled) }
     }
 
+    fun updateM3DynamicColor(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setM3DynamicColor(enabled) }
+    }
+
+    fun updateM3UseExpressiveMotion(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setM3UseExpressiveMotion(enabled) }
+    }
+
     // Typography
     fun setAppFontFamily(family: String) {
         viewModelScope.launch { preferencesRepository.setAppFontFamily(family) }
