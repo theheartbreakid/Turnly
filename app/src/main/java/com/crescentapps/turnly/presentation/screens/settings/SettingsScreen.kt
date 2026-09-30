@@ -948,7 +948,7 @@ fun SettingsScreen(
             onPositive = { showUiSystemDialog = false }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(UiSystemMode.GAUSSIAN_BLUR, UiSystemMode.LIQUID).forEach { mode ->
+                listOf(UiSystemMode.GAUSSIAN_BLUR, UiSystemMode.LIQUID, UiSystemMode.MATERIAL_3_EXPRESSIVE).forEach { mode ->
                     val isSelected = prefs.uiSystemMode == mode
                     Row(
                         modifier = Modifier
@@ -972,6 +972,7 @@ fun SettingsScreen(
                             val desc = when (mode) {
                                 UiSystemMode.GAUSSIAN_BLUR -> "BitChord-inspired physical glass with real backdrop blur"
                                 UiSystemMode.LIQUID -> "Prismal OpenGL shader liquid glass"
+                                UiSystemMode.MATERIAL_3_EXPRESSIVE -> "Modern adaptive Material 3 Expressive theme"
                             }
                             Text(desc, style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Normal), color = adaptiveColor.copy(alpha = 0.6f))
                         }

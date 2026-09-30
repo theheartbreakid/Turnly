@@ -32,5 +32,12 @@ fun TurnlyApp(
                 deepLinkCode = deepLinkCode
             )
         }
+        UiSystemMode.MATERIAL_3_EXPRESSIVE -> {
+            com.crescentapps.turnly.presentation.m3expressive.Material3ExpressiveApp(
+                app = app,
+                prefs = prefs,
+                deepLinkCode = deepLinkCode
+            )
+        }
     }
 }
