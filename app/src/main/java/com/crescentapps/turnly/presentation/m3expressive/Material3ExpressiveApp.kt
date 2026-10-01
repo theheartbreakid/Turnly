@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import kotlinx.coroutines.launch
 import com.crescentapps.turnly.TurnlyApplication
 import com.crescentapps.turnly.core.model.Schedule
 import com.crescentapps.turnly.core.model.ThemeMode
@@ -83,13 +84,13 @@ fun Material3ExpressiveApp(
                 }
             },
             containerColor = MaterialTheme.colorScheme.background
-        ) { innerPadding ->
+        ) { paddingValues ->
             NavHost(
                 navController = navController,
                 startDestination = Screen.Home.route,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = if (showDock) innerPadding.calculateBottomPadding() else ScaffoldDefaults.contentWindowInsets.asPaddingValues().calculateBottomPadding())
+                    .padding(top = paddingValues.calculateTopPadding())
             ) {
                 composable(Screen.Home.route) {
                     val homeViewModel: HomeViewModel = viewModel { HomeViewModel(app.repository, app.roomRepository) }
@@ -112,11 +113,17 @@ fun Material3ExpressiveApp(
                 }
                 composable(Screen.Schedules.route) {
                     val schedules by app.repository.activeSchedules.collectAsState(initial = emptyList<Schedule>())
+                    val coroutineScope = rememberCoroutineScope()
                     M3SchedulesScreen(
                         schedules = schedules,
                         onCreateSchedule = { navController.navigate(Screen.CreateSchedule.route) },
                         onScheduleClick = { sId ->
                             navController.navigate(Screen.ScheduleDetail.createRoute(sId))
+                        },
+                        onTogglePause = { schedule ->
+                            coroutineScope.launch {
+                                app.repository.setSchedulePauseState(schedule.id, !schedule.isPaused, null)
+                            }
                         }
                     )
                 }

@@ -26,7 +26,8 @@ import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveTokens
 fun M3SchedulesScreen(
     schedules: List<Schedule>,
     onCreateSchedule: () -> Unit,
-    onScheduleClick: (Long) -> Unit
+    onScheduleClick: (Long) -> Unit,
+    onTogglePause: ((Schedule) -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
@@ -41,7 +42,9 @@ fun M3SchedulesScreen(
                 actions = {
                     TurnlyExpressiveSplitButton(
                         onPrimaryClick = onCreateSchedule,
-                        onSecondaryClick = onCreateSchedule,
+                        onOptionSelected = { _ ->
+                            onCreateSchedule()
+                        },
                         primaryText = "New",
                         primaryIcon = { Icon(Icons.Default.Add, contentDescription = null) }
                     )
@@ -112,7 +115,7 @@ fun M3SchedulesScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(schedules) { schedule ->
+                items(schedules, key = { it.id }) { schedule ->
                     TurnlyExpressiveCard(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(28.dp),
@@ -161,7 +164,7 @@ fun M3SchedulesScreen(
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
-                                            text = "Next turn: Participant",
+                                            text = if (schedule.isPaused) "Status: Paused" else "Status: Active",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -217,7 +220,7 @@ fun M3SchedulesScreen(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "${schedule.frequencyType.name.lowercase().replaceFirstChar { it.uppercase() }} • 10:00 PM",
+                                        text = schedule.frequencyType.name.lowercase().replaceFirstChar { it.uppercase() },
                                         style = MaterialTheme.typography.labelLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -225,16 +228,9 @@ fun M3SchedulesScreen(
 
                                 Switch(
                                     checked = !schedule.isPaused,
-                                    onCheckedChange = { /* Toggle state */ },
-                                    thumbContent = if (!schedule.isPaused) {
-                                        {
-                                            Icon(
-                                                imageVector = Icons.Default.Add,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(SwitchDefaults.IconSize)
-                                            )
-                                        }
-                                    } else null
+                                    onCheckedChange = {
+                                        onTogglePause?.invoke(schedule)
+                                    }
                                 )
                             }
                         }

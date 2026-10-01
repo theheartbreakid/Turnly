@@ -12,6 +12,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontVariation
+import com.crescentapps.turnly.R
+
 data class TurnlySpacing(
     val micro: Dp = 4.dp,
     val small: Dp = 8.dp,
@@ -105,16 +109,87 @@ fun getShapesForPersonality(personality: String, variation: String): Shapes {
 
 val ExpressiveMaterialShapes = getShapesForPersonality("EXPRESSIVE", "MEDIUM")
 
-fun getTypographyForStyle(fontStyle: String, emphasis: String): Typography {
+fun getTypographyForStyle(fontStyle: String, emphasis: String, personality: String = "STANDARD"): Typography {
+    // Dynamic Google Sans Flex variations
+    val isExpressivePersonality = personality == "EXPRESSIVE"
+    val roundness = if (isExpressivePersonality) 100f else 0f
+    
+    val baseWeight = when (emphasis) {
+        "STRONG" -> 700
+        "STANDARD" -> 500
+        else -> 600 // EXPRESSIVE
+    }
+    
+    val titleWeightVal = when (emphasis) {
+        "STRONG" -> 800
+        "STANDARD" -> 600
+        else -> 700 // EXPRESSIVE
+    }
+    
+    val headlineWeightVal = when (emphasis) {
+        "STRONG" -> 900
+        "STANDARD" -> 700
+        else -> 800 // EXPRESSIVE
+    }
+
+    val baseGrade = if (isExpressivePersonality) 50f else 0f
+
+    val googleSansFlexFamily = FontFamily(
+        Font(
+            resId = R.font.google_sans_flex,
+            variationSettings = FontVariation.Settings(
+                FontVariation.weight(baseWeight),
+                FontVariation.Setting("ROND", roundness),
+                FontVariation.Setting("GRAD", baseGrade)
+            )
+        )
+    )
+    
+    val googleSansFlexTitleFamily = FontFamily(
+        Font(
+            resId = R.font.google_sans_flex,
+            variationSettings = FontVariation.Settings(
+                FontVariation.weight(titleWeightVal),
+                FontVariation.Setting("ROND", roundness),
+                FontVariation.Setting("GRAD", baseGrade)
+            )
+        )
+    )
+
+    val googleSansFlexHeadlineFamily = FontFamily(
+        Font(
+            resId = R.font.google_sans_flex,
+            variationSettings = FontVariation.Settings(
+                FontVariation.weight(headlineWeightVal),
+                FontVariation.Setting("ROND", roundness),
+                FontVariation.Setting("GRAD", baseGrade)
+            )
+        )
+    )
+
     val family = when (fontStyle) {
-        "GOOGLE_SANS", "GOOGLE_SANS_FLEX" -> FontFamily.SansSerif
+        "SF_PRO" -> com.crescentapps.turnly.presentation.theme.SfProText
+        "SF_PRO_ROUNDED" -> com.crescentapps.turnly.presentation.theme.SfProRounded
+        "GOOGLE_SANS", "GOOGLE_SANS_FLEX" -> googleSansFlexFamily
         else -> FontFamily.Default
     }
+    
+    val titleFamily = when (fontStyle) {
+        "GOOGLE_SANS", "GOOGLE_SANS_FLEX" -> googleSansFlexTitleFamily
+        else -> family
+    }
+
+    val headlineFamily = when (fontStyle) {
+        "GOOGLE_SANS", "GOOGLE_SANS_FLEX" -> googleSansFlexHeadlineFamily
+        else -> family
+    }
+
     val titleWeight = when (emphasis) {
         "STRONG" -> FontWeight.ExtraBold
         "STANDARD" -> FontWeight.SemiBold
         else -> FontWeight.Bold // EXPRESSIVE
     }
+    
     val headlineWeight = when (emphasis) {
         "STRONG" -> FontWeight.Black
         "STANDARD" -> FontWeight.Medium
@@ -123,57 +198,57 @@ fun getTypographyForStyle(fontStyle: String, emphasis: String): Typography {
 
     return Typography(
         displayLarge = TextStyle(
-            fontFamily = family,
-            fontWeight = headlineWeight,
+            fontFamily = headlineFamily,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else headlineWeight,
             fontSize = 57.sp,
             lineHeight = 64.sp,
             letterSpacing = (-0.25).sp
         ),
         displayMedium = TextStyle(
-            fontFamily = family,
-            fontWeight = headlineWeight,
+            fontFamily = headlineFamily,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else headlineWeight,
             fontSize = 45.sp,
             lineHeight = 52.sp,
             letterSpacing = 0.sp
         ),
         displaySmall = TextStyle(
-            fontFamily = family,
-            fontWeight = headlineWeight,
+            fontFamily = headlineFamily,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else headlineWeight,
             fontSize = 36.sp,
             lineHeight = 44.sp,
             letterSpacing = 0.sp
         ),
         headlineLarge = TextStyle(
-            fontFamily = family,
-            fontWeight = headlineWeight,
+            fontFamily = headlineFamily,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else headlineWeight,
             fontSize = 32.sp,
             lineHeight = 40.sp,
             letterSpacing = 0.sp
         ),
         headlineMedium = TextStyle(
-            fontFamily = family,
-            fontWeight = titleWeight,
+            fontFamily = titleFamily,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else titleWeight,
             fontSize = 28.sp,
             lineHeight = 36.sp,
             letterSpacing = 0.sp
         ),
         headlineSmall = TextStyle(
-            fontFamily = family,
-            fontWeight = titleWeight,
+            fontFamily = titleFamily,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else titleWeight,
             fontSize = 24.sp,
             lineHeight = 32.sp,
             letterSpacing = 0.sp
         ),
         titleLarge = TextStyle(
-            fontFamily = family,
-            fontWeight = titleWeight,
+            fontFamily = titleFamily,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else titleWeight,
             fontSize = 22.sp,
             lineHeight = 28.sp,
             letterSpacing = 0.sp
         ),
         titleMedium = TextStyle(
             fontFamily = family,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else FontWeight.SemiBold,
             fontSize = 18.sp,
             lineHeight = 24.sp,
             letterSpacing = 0.15.sp
@@ -194,14 +269,14 @@ fun getTypographyForStyle(fontStyle: String, emphasis: String): Typography {
         ),
         labelLarge = TextStyle(
             fontFamily = family,
-            fontWeight = FontWeight.Medium,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else FontWeight.Medium,
             fontSize = 14.sp,
             lineHeight = 20.sp,
             letterSpacing = 0.1.sp
         ),
         labelMedium = TextStyle(
             fontFamily = family,
-            fontWeight = FontWeight.Medium,
+            fontWeight = if (family == googleSansFlexFamily) FontWeight.Normal else FontWeight.Medium,
             fontSize = 12.sp,
             lineHeight = 16.sp,
             letterSpacing = 0.5.sp
@@ -209,7 +284,7 @@ fun getTypographyForStyle(fontStyle: String, emphasis: String): Typography {
     )
 }
 
-val ExpressiveTypography = getTypographyForStyle("SYSTEM", "EXPRESSIVE")
+val ExpressiveTypography = getTypographyForStyle("SYSTEM", "EXPRESSIVE", "STANDARD")
 
 val LocalTurnlySpacing = staticCompositionLocalOf { TurnlySpacing() }
 

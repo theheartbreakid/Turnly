@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.crescentapps.turnly.core.model.ThemeMode
 import com.crescentapps.turnly.core.model.UiSystemMode
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveCard
+import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveLivePreview
 import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveTokens
 import com.crescentapps.turnly.presentation.screens.settings.SettingsViewModel
 
@@ -35,8 +36,7 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                 title = { 
                     Text(
                         "Settings",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineLarge
                     ) 
                 }
             )
@@ -54,6 +54,11 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Live Preview Card
+            item {
+                TurnlyExpressiveLivePreview()
+            }
+
             // UI Style Selector
             item {
                 TurnlyExpressiveCard(
@@ -67,7 +72,6 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                         Text(
                             text = "Appearance",
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
                         )
 
@@ -76,7 +80,6 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                         Text(
                             text = "UI Style",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(4.dp))
@@ -138,7 +141,6 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                         Text(
                             text = "Theme Mode",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -201,7 +203,6 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                             Text(
                                 text = "Color Personalities",
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -248,8 +249,7 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                         var sliderValue by remember(prefs.m3ColorIntensity) { mutableFloatStateOf(prefs.m3ColorIntensity) }
                         Text(
                             text = "Color Intensity",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(
@@ -307,7 +307,6 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                             Text(
                                 text = "Typography & Font",
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -316,15 +315,15 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
 
                         Text(
                             text = "Font Family",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
                         val fontFamilies = listOf(
                             "SYSTEM" to "System",
-                            "GOOGLE_SANS" to "Google Sans",
-                            "GOOGLE_SANS_FLEX" to "Sans Flex"
+                            "GOOGLE_SANS" to "Sans",
+                            "SF_PRO" to "SF Pro",
+                            "SF_PRO_ROUNDED" to "Rounded"
                         )
 
                         SingleChoiceSegmentedButtonRow(
@@ -348,7 +347,7 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                                 ) {
                                     Text(
                                         text = label,
-                                        style = MaterialTheme.typography.labelMedium,
+                                        style = MaterialTheme.typography.labelSmall,
                                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                     )
                                 }
@@ -359,8 +358,7 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
 
                         Text(
                             text = "Typography Emphasis",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -422,7 +420,6 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                             Text(
                                 text = "Density & Shapes",
                                 style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -431,8 +428,7 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
 
                         Text(
                             text = "Layout Density",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -474,8 +470,7 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
 
                         Text(
                             text = "Shape Personality",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.titleMedium
                         )
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -530,7 +525,6 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                         Text(
                             text = "Motion & System",
                             style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
