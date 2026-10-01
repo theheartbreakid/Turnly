@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import com.crescentapps.turnly.data.preferences.UserPreferences
 
@@ -154,6 +155,103 @@ private val DarkCalmColors = darkColorScheme(
     surfaceContainerHighest = Color(0xFF363435)
 )
 
+/**
+ * Adjusts the saturation and lightness of a color.
+ */
+private fun Color.adjust(saturationMultiplier: Float, lightnessMultiplier: Float = 1f): Color {
+    val hsl = FloatArray(3)
+    ColorUtils.colorToHSL(this.toArgb(), hsl)
+    hsl[1] = (hsl[1] * saturationMultiplier).coerceIn(0f, 1f)
+    hsl[2] = (hsl[2] * lightnessMultiplier).coerceIn(0f, 1f)
+    return Color(ColorUtils.HSLToColor(hsl))
+}
+
+/**
+ * Applies color personality transformations to an existing scheme (useful for dynamic color).
+ */
+private fun applyPersonalityToScheme(scheme: ColorScheme, personality: String): ColorScheme {
+    val (satMult, lightMult) = when (personality) {
+        "VIBRANT" -> 1.4f to 1.0f
+        "CALM" -> 0.6f to 0.95f
+        "PLAYFUL" -> 1.2f to 1.05f
+        "ELEGANT" -> 0.45f to 1.0f
+        "MONOCHROME" -> 0.0f to 1.0f
+        "NATURE" -> 0.75f to 1.0f
+        else -> 1.0f to 1.0f // BALANCED
+    }
+
+    if (satMult == 1.0f && lightMult == 1.0f) return scheme
+
+    return scheme.copy(
+        primary = scheme.primary.adjust(satMult, lightMult),
+        primaryContainer = scheme.primaryContainer.adjust(satMult, lightMult),
+        secondary = scheme.secondary.adjust(satMult, lightMult),
+        secondaryContainer = scheme.secondaryContainer.adjust(satMult, lightMult),
+        tertiary = scheme.tertiary.adjust(satMult, lightMult),
+        tertiaryContainer = scheme.tertiaryContainer.adjust(satMult, lightMult),
+        background = scheme.background.adjust(satMult, lightMult),
+        surface = scheme.surface.adjust(satMult, lightMult),
+        surfaceVariant = scheme.surfaceVariant.adjust(satMult, lightMult),
+        surfaceTint = scheme.surfaceTint.adjust(satMult, lightMult),
+        inverseSurface = scheme.inverseSurface.adjust(satMult, lightMult),
+        outline = scheme.outline.adjust(satMult, lightMult),
+        outlineVariant = scheme.outlineVariant.adjust(satMult, lightMult),
+        surfaceBright = scheme.surfaceBright.adjust(satMult, lightMult),
+        surfaceContainer = scheme.surfaceContainer.adjust(satMult, lightMult),
+        surfaceContainerHigh = scheme.surfaceContainerHigh.adjust(satMult, lightMult),
+        surfaceContainerHighest = scheme.surfaceContainerHighest.adjust(satMult, lightMult),
+        surfaceContainerLow = scheme.surfaceContainerLow.adjust(satMult, lightMult),
+        surfaceContainerLowest = scheme.surfaceContainerLowest.adjust(satMult, lightMult),
+        surfaceDim = scheme.surfaceDim.adjust(satMult, lightMult),
+    )
+}
+
+// Playful Color Schemes
+private val LightPlayfulColors = applyPersonalityToScheme(LightVibrantColors, "PLAYFUL").copy(
+    primary = Color(0xFFF94144),
+    primaryContainer = Color(0xFFFFD6D6),
+    secondary = Color(0xFFF3722C),
+    tertiary = Color(0xFFF9C74F)
+)
+private val DarkPlayfulColors = applyPersonalityToScheme(DarkVibrantColors, "PLAYFUL").copy(
+    primary = Color(0xFFFF7A7A),
+    primaryContainer = Color(0xFF7A0000),
+    secondary = Color(0xFFFF9E70),
+    tertiary = Color(0xFFFFE070)
+)
+
+// Elegant Color Schemes
+private val LightElegantColors = applyPersonalityToScheme(LightBalancedColors, "ELEGANT").copy(
+    primary = Color(0xFF5E5470),
+    primaryContainer = Color(0xFFE4DEF0),
+    secondary = Color(0xFF8C7A6B),
+    tertiary = Color(0xFF6B7A8C)
+)
+private val DarkElegantColors = applyPersonalityToScheme(DarkBalancedColors, "ELEGANT").copy(
+    primary = Color(0xFFBDB2D1),
+    primaryContainer = Color(0xFF3F3551),
+    secondary = Color(0xFFD4BFA9),
+    tertiary = Color(0xFFA9BFD4)
+)
+
+// Monochrome Color Schemes
+private val LightMonochromeColors = applyPersonalityToScheme(LightBalancedColors, "MONOCHROME")
+private val DarkMonochromeColors = applyPersonalityToScheme(DarkBalancedColors, "MONOCHROME")
+
+// Nature Color Schemes
+private val LightNatureColors = applyPersonalityToScheme(LightCalmColors, "NATURE").copy(
+    primary = Color(0xFF4A6B53),
+    primaryContainer = Color(0xFFD3EADD),
+    secondary = Color(0xFF6B654A),
+    tertiary = Color(0xFF4A5F6B)
+)
+private val DarkNatureColors = applyPersonalityToScheme(DarkCalmColors, "NATURE").copy(
+    primary = Color(0xFF90B59B),
+    primaryContainer = Color(0xFF2A4A33),
+    secondary = Color(0xFFB5AE90),
+    tertiary = Color(0xFF90A5B5)
+)
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TurnlyExpressiveTheme(
@@ -167,11 +265,16 @@ fun TurnlyExpressiveTheme(
     
     val rawColorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            val baseDynamic = if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            applyPersonalityToScheme(baseDynamic, prefs.m3ColorPersonality)
         }
         else -> when (prefs.m3ColorPersonality) {
             "VIBRANT" -> if (isDark) DarkVibrantColors else LightVibrantColors
             "CALM" -> if (isDark) DarkCalmColors else LightCalmColors
+            "PLAYFUL" -> if (isDark) DarkPlayfulColors else LightPlayfulColors
+            "ELEGANT" -> if (isDark) DarkElegantColors else LightElegantColors
+            "MONOCHROME" -> if (isDark) DarkMonochromeColors else LightMonochromeColors
+            "NATURE" -> if (isDark) DarkNatureColors else LightNatureColors
             else -> if (isDark) DarkBalancedColors else LightBalancedColors
         }
     }
@@ -219,7 +322,8 @@ fun TurnlyExpressiveTheme(
     }
 
     CompositionLocalProvider(
-        LocalTurnlySpacing provides spacing
+        LocalTurnlySpacing provides spacing,
+        LocalUserPreferences provides prefs
     ) {
         MaterialExpressiveTheme(
             colorScheme = baseColorScheme,

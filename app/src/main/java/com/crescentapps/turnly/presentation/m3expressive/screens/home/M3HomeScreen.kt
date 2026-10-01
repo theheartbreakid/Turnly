@@ -24,12 +24,15 @@ import com.crescentapps.turnly.core.model.ScheduleType
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveButton
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveCard
 import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveTokens
+import com.crescentapps.turnly.presentation.m3expressive.components.expressiveLightRay
+import com.crescentapps.turnly.data.preferences.UserPreferences
 import com.crescentapps.turnly.presentation.screens.home.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun M3HomeScreen(
     viewModel: HomeViewModel,
+    prefs: UserPreferences,
     onCreateSchedule: () -> Unit,
     onScheduleClick: (Long) -> Unit
 ) {
@@ -63,7 +66,8 @@ fun M3HomeScreen(
                 text = { Text("New Schedule") },
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.expressiveLightRay(shape = CircleShape)
             )
         }
     ) { padding ->
@@ -141,7 +145,9 @@ fun M3HomeScreen(
                 // Expressive Next-Turn Hero Surface
                 item {
                     TurnlyExpressiveCard(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .expressiveLightRay(shape = RoundedCornerShape(36.dp)),
                         shape = RoundedCornerShape(36.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -236,7 +242,8 @@ fun M3HomeScreen(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(52.dp),
+                                        .height(52.dp)
+                                        .expressiveLightRay(shape = CircleShape),
                                     shape = CircleShape,
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = MaterialTheme.colorScheme.primary,
@@ -348,6 +355,7 @@ fun M3HomeScreen(
 
     if (turnForAmountDialog != null) {
         AlertDialog(
+            modifier = Modifier.expressiveLightRay(shape = RoundedCornerShape(28.dp)),
             onDismissRequest = { turnForAmountDialog = null },
             title = { Text("Record Expense", fontWeight = FontWeight.Bold) },
             text = {

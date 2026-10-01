@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.crescentapps.turnly.presentation.m3expressive.components.expressiveLightRay
 
 enum class M3NavDestination(val route: String, val label: String, val icon: ImageVector) {
     HOME("home", "Today", Icons.Default.Home),
@@ -141,6 +142,10 @@ private fun M3DockItem(
             .shadow(elevation = elevation, shape = RoundedCornerShape(cornerRadius))
             .clip(RoundedCornerShape(cornerRadius))
             .background(containerColor)
+            .expressiveLightRay(
+                enabled = isSelected,
+                shape = RoundedCornerShape(cornerRadius)
+            )
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

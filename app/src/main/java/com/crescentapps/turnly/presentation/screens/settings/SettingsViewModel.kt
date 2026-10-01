@@ -238,6 +238,50 @@ class SettingsViewModel(
         viewModelScope.launch { preferencesRepository.setM3ShapeVariation(variation) }
     }
 
+    fun setM3LightRaysEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setM3LightRaysEnabled(enabled) }
+    }
+
+    fun setM3GradientX(x: Float) {
+        viewModelScope.launch { preferencesRepository.setM3GradientX(x) }
+    }
+
+    fun setM3GradientY(y: Float) {
+        viewModelScope.launch { preferencesRepository.setM3GradientY(y) }
+    }
+
+    fun setM3GradientAngle(angle: Float) {
+        viewModelScope.launch { preferencesRepository.setM3GradientAngle(angle) }
+    }
+
+    fun setM3GradientWidth(width: Float) {
+        viewModelScope.launch { preferencesRepository.setM3GradientWidth(width) }
+    }
+
+    fun setM3GradientLength(length: Float) {
+        viewModelScope.launch { preferencesRepository.setM3GradientLength(length) }
+    }
+
+    fun setM3GradientSoftness(softness: Float) {
+        viewModelScope.launch { preferencesRepository.setM3GradientSoftness(softness) }
+    }
+
+    fun setM3GradientIntensity(intensity: Float) {
+        viewModelScope.launch { preferencesRepository.setM3GradientIntensity(intensity) }
+    }
+
+    fun setM3GradientColorSource(source: String) {
+        viewModelScope.launch { preferencesRepository.setM3GradientColorSource(source) }
+    }
+
+    fun setM3ShapeMorphingEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setM3ShapeMorphingEnabled(enabled) }
+    }
+
+    fun setM3DecorativeMotionEnabled(enabled: Boolean) {
+        viewModelScope.launch { preferencesRepository.setM3DecorativeMotionEnabled(enabled) }
+    }
+
     // Typography
     fun setAppFontFamily(family: String) {
         viewModelScope.launch { preferencesRepository.setAppFontFamily(family) }

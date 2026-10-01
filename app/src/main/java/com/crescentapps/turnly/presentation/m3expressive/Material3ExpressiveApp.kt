@@ -67,10 +67,184 @@ fun Material3ExpressiveApp(
         val showDock = currentRoute in mainRoutes
 
         Scaffold(
-            bottomBar = {
+            containerColor = MaterialTheme.colorScheme.background
+        ) { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Screen.Home.route,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = paddingValues.calculateTopPadding()),
+                    enterTransition = { androidx.compose.animation.slideInHorizontally(
+                        animationSpec = androidx.compose.animation.core.tween(300),
+                        initialOffsetX = { fullWidth -> fullWidth / 8 }
+                    ) + androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300)) },
+                    exitTransition = { androidx.compose.animation.slideOutHorizontally(
+                        animationSpec = androidx.compose.animation.core.tween(300),
+                        targetOffsetX = { fullWidth -> -fullWidth / 8 }
+                    ) + androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300)) },
+                    popEnterTransition = { androidx.compose.animation.slideInHorizontally(
+                        animationSpec = androidx.compose.animation.core.tween(300),
+                        initialOffsetX = { fullWidth -> -fullWidth / 8 }
+                    ) + androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300)) },
+                    popExitTransition = { androidx.compose.animation.slideOutHorizontally(
+                        animationSpec = androidx.compose.animation.core.tween(300),
+                        targetOffsetX = { fullWidth -> fullWidth / 8 }
+                    ) + androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300)) }
+                ) {
+                    composable(Screen.Home.route) {
+                        val homeViewModel: HomeViewModel = viewModel { HomeViewModel(app.repository, app.roomRepository) }
+                        M3HomeScreen(
+                            viewModel = homeViewModel,
+                            prefs = prefs,
+                            onCreateSchedule = { navController.navigate(Screen.CreateSchedule.route) },
+                            onScheduleClick = { sId ->
+                                navController.navigate(Screen.ScheduleDetail.createRoute(sId))
+                            }
+                        )
+                    }
+                    composable(Screen.Calendar.route) {
+                        val calendarViewModel: CalendarViewModel = viewModel { CalendarViewModel(app.repository) }
+                        M3CalendarScreen(
+                            viewModel = calendarViewModel,
+                            onScheduleClick = { sId ->
+                                navController.navigate(Screen.ScheduleDetail.createRoute(sId))
+                            }
+                        )
+                    }
+                    composable(Screen.Schedules.route) {
+                        val schedules by app.repository.activeSchedules.collectAsState(initial = emptyList<Schedule>())
+                        val coroutineScope = rememberCoroutineScope()
+                        M3SchedulesScreen(
+                            schedules = schedules,
+                            onCreateSchedule = { navController.navigate(Screen.CreateSchedule.route) },
+                            onScheduleClick = { sId ->
+                                navController.navigate(Screen.ScheduleDetail.createRoute(sId))
+                            },
+                            onTogglePause = { schedule ->
+                                coroutineScope.launch {
+                                    app.repository.setSchedulePauseState(schedule.id, !schedule.isPaused, null)
+                                }
+                            }
+                        )
+                    }
+                    composable(Screen.Rooms.route) {
+                        val roomViewModel: RoomViewModel = viewModel { RoomViewModel(app.roomRepository, app.repository) }
+                        M3RoomsScreen(
+                            viewModel = roomViewModel,
+                            onCreateRoom = { navController.navigate(Screen.CreateRoom.route) },
+                            onJoinRoom = { navController.navigate(Screen.JoinRoom.createRoute()) },
+                            onRoomClick = { rId ->
+                                navController.navigate(Screen.RoomDetail.createRoute(rId))
+                            }
+                        )
+                    }
+                    composable(Screen.CreateRoom.route) {
+                        val roomViewModel: RoomViewModel = viewModel { RoomViewModel(app.roomRepository, app.repository) }
+                        com.crescentapps.turnly.presentation.m3expressive.screens.room.M3CreateRoomScreen(
+                            viewModel = roomViewModel,
+                            onNavigateBack = { navController.popBackStack() },
+                            onRoomCreated = { rId ->
+                                navController.navigate(Screen.RoomDetail.createRoute(rId)) {
+                                    popUpTo(Screen.Rooms.route)
+                                }
+                            }
+                        )
+                    }
+                    composable(
+                        route = Screen.JoinRoom.route,
+                        arguments = listOf(navArgument("code") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        })
+                    ) { backStackEntry ->
+                        val codeArg = backStackEntry.arguments?.getString("code")
+                        val roomViewModel: RoomViewModel = viewModel { RoomViewModel(app.roomRepository, app.repository) }
+                        com.crescentapps.turnly.presentation.m3expressive.screens.room.M3JoinRoomScreen(
+                            viewModel = roomViewModel,
+                            initialRoomCode = codeArg,
+                            onNavigateBack = { navController.popBackStack() },
+                            onJoinedSuccessfully = { rId ->
+                                navController.navigate(Screen.RoomDetail.createRoute(rId)) {
+                                    popUpTo(Screen.Rooms.route)
+                                }
+                            }
+                        )
+                    }
+                    composable(
+                        route = Screen.RoomDetail.route,
+                        arguments = listOf(navArgument("roomId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val rId = backStackEntry.arguments?.getLong("roomId") ?: return@composable
+                        val detailViewModel: com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel = viewModel(key = "room_detail_$rId") {
+                            com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel(app.roomRepository, app.repository, rId)
+                        }
+                        com.crescentapps.turnly.presentation.m3expressive.screens.room.M3RoomDetailScreen(
+                            viewModel = detailViewModel,
+                            onNavigateBack = { navController.popBackStack() },
+                            onNavigateToSettings = { roomId ->
+                                navController.navigate(Screen.RoomSettings.createRoute(roomId))
+                            },
+                            onScheduleClick = { sId ->
+                                navController.navigate(Screen.ScheduleDetail.createRoute(sId))
+                            }
+                        )
+                    }
+                    composable(
+                        route = Screen.RoomSettings.route,
+                        arguments = listOf(navArgument("roomId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val rId = backStackEntry.arguments?.getLong("roomId") ?: return@composable
+                        val detailViewModel: com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel = viewModel(key = "room_settings_$rId") {
+                            com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel(app.roomRepository, app.repository, rId)
+                        }
+                        com.crescentapps.turnly.presentation.m3expressive.screens.room.M3RoomSettingsScreen(
+                            viewModel = detailViewModel,
+                            onNavigateBack = { navController.popBackStack() },
+                            onRoomExited = {
+                                navController.popBackStack(Screen.Rooms.route, false)
+                            }
+                        )
+                    }
+                    composable(
+                        route = Screen.ScheduleDetail.route,
+                        arguments = listOf(navArgument("scheduleId") { type = NavType.LongType })
+                    ) { backStackEntry ->
+                        val sId = backStackEntry.arguments?.getLong("scheduleId") ?: return@composable
+                        val detailViewModel: com.crescentapps.turnly.presentation.screens.schedule.ScheduleDetailViewModel = viewModel(key = "schedule_detail_$sId") {
+                            com.crescentapps.turnly.presentation.screens.schedule.ScheduleDetailViewModel(app.repository, sId)
+                        }
+                        com.crescentapps.turnly.presentation.m3expressive.screens.schedule.M3ScheduleDetailScreen(
+                            viewModel = detailViewModel,
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable(Screen.History.route) {
+                        val historyViewModel: HistoryViewModel = viewModel { HistoryViewModel(app.repository) }
+                        M3HistoryScreen(viewModel = historyViewModel)
+                    }
+                    composable(Screen.Settings.route) {
+                        val settingsViewModel: SettingsViewModel = viewModel {
+                            SettingsViewModel(app.userPreferencesRepository, app.repository, app.updateManager)
+                        }
+                        M3SettingsScreen(viewModel = settingsViewModel)
+                    }
+                    composable(Screen.CreateSchedule.route) {
+                        val formViewModel: ScheduleFormViewModel = viewModel { ScheduleFormViewModel(app.repository, app.roomRepository) }
+                        M3CreateScheduleScreen(
+                            viewModel = formViewModel,
+                            onNavigateBack = { navController.popBackStack() },
+                            onCreatedSuccessfully = { navController.popBackStack() }
+                        )
+                    }
+                } // End of NavHost
+                
                 if (showDock) {
                     M3ExpressiveDock(
                         currentRoute = currentRoute,
+                        modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter),
                         onNavigate = { destination ->
                             navController.navigate(destination.route) {
                                 popUpTo(Screen.Home.route) {
@@ -82,162 +256,7 @@ fun Material3ExpressiveApp(
                         }
                     )
                 }
-            },
-            containerColor = MaterialTheme.colorScheme.background
-        ) { paddingValues ->
-            NavHost(
-                navController = navController,
-                startDestination = Screen.Home.route,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = paddingValues.calculateTopPadding())
-            ) {
-                composable(Screen.Home.route) {
-                    val homeViewModel: HomeViewModel = viewModel { HomeViewModel(app.repository, app.roomRepository) }
-                    M3HomeScreen(
-                        viewModel = homeViewModel,
-                        onCreateSchedule = { navController.navigate(Screen.CreateSchedule.route) },
-                        onScheduleClick = { sId ->
-                            navController.navigate(Screen.ScheduleDetail.createRoute(sId))
-                        }
-                    )
-                }
-                composable(Screen.Calendar.route) {
-                    val calendarViewModel: CalendarViewModel = viewModel { CalendarViewModel(app.repository) }
-                    M3CalendarScreen(
-                        viewModel = calendarViewModel,
-                        onScheduleClick = { sId ->
-                            navController.navigate(Screen.ScheduleDetail.createRoute(sId))
-                        }
-                    )
-                }
-                composable(Screen.Schedules.route) {
-                    val schedules by app.repository.activeSchedules.collectAsState(initial = emptyList<Schedule>())
-                    val coroutineScope = rememberCoroutineScope()
-                    M3SchedulesScreen(
-                        schedules = schedules,
-                        onCreateSchedule = { navController.navigate(Screen.CreateSchedule.route) },
-                        onScheduleClick = { sId ->
-                            navController.navigate(Screen.ScheduleDetail.createRoute(sId))
-                        },
-                        onTogglePause = { schedule ->
-                            coroutineScope.launch {
-                                app.repository.setSchedulePauseState(schedule.id, !schedule.isPaused, null)
-                            }
-                        }
-                    )
-                }
-                composable(Screen.Rooms.route) {
-                    val roomViewModel: RoomViewModel = viewModel { RoomViewModel(app.roomRepository, app.repository) }
-                    M3RoomsScreen(
-                        viewModel = roomViewModel,
-                        onCreateRoom = { navController.navigate(Screen.CreateRoom.route) },
-                        onJoinRoom = { navController.navigate(Screen.JoinRoom.createRoute()) },
-                        onRoomClick = { rId ->
-                            navController.navigate(Screen.RoomDetail.createRoute(rId))
-                        }
-                    )
-                }
-                composable(Screen.CreateRoom.route) {
-                    val roomViewModel: RoomViewModel = viewModel { RoomViewModel(app.roomRepository, app.repository) }
-                    com.crescentapps.turnly.presentation.m3expressive.screens.room.M3CreateRoomScreen(
-                        viewModel = roomViewModel,
-                        onNavigateBack = { navController.popBackStack() },
-                        onRoomCreated = { rId ->
-                            navController.navigate(Screen.RoomDetail.createRoute(rId)) {
-                                popUpTo(Screen.Rooms.route)
-                            }
-                        }
-                    )
-                }
-                composable(
-                    route = Screen.JoinRoom.route,
-                    arguments = listOf(navArgument("code") {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    })
-                ) { backStackEntry ->
-                    val codeArg = backStackEntry.arguments?.getString("code")
-                    val roomViewModel: RoomViewModel = viewModel { RoomViewModel(app.roomRepository, app.repository) }
-                    com.crescentapps.turnly.presentation.m3expressive.screens.room.M3JoinRoomScreen(
-                        viewModel = roomViewModel,
-                        initialRoomCode = codeArg,
-                        onNavigateBack = { navController.popBackStack() },
-                        onJoinedSuccessfully = { rId ->
-                            navController.navigate(Screen.RoomDetail.createRoute(rId)) {
-                                popUpTo(Screen.Rooms.route)
-                            }
-                        }
-                    )
-                }
-                composable(
-                    route = Screen.RoomDetail.route,
-                    arguments = listOf(navArgument("roomId") { type = NavType.LongType })
-                ) { backStackEntry ->
-                    val rId = backStackEntry.arguments?.getLong("roomId") ?: return@composable
-                    val detailViewModel: com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel = viewModel(key = "room_detail_$rId") {
-                        com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel(app.roomRepository, app.repository, rId)
-                    }
-                    com.crescentapps.turnly.presentation.m3expressive.screens.room.M3RoomDetailScreen(
-                        viewModel = detailViewModel,
-                        onNavigateBack = { navController.popBackStack() },
-                        onNavigateToSettings = { roomId ->
-                            navController.navigate(Screen.RoomSettings.createRoute(roomId))
-                        },
-                        onScheduleClick = { sId ->
-                            navController.navigate(Screen.ScheduleDetail.createRoute(sId))
-                        }
-                    )
-                }
-                composable(
-                    route = Screen.RoomSettings.route,
-                    arguments = listOf(navArgument("roomId") { type = NavType.LongType })
-                ) { backStackEntry ->
-                    val rId = backStackEntry.arguments?.getLong("roomId") ?: return@composable
-                    val detailViewModel: com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel = viewModel(key = "room_settings_$rId") {
-                        com.crescentapps.turnly.presentation.screens.room.RoomDetailViewModel(app.roomRepository, app.repository, rId)
-                    }
-                    com.crescentapps.turnly.presentation.m3expressive.screens.room.M3RoomSettingsScreen(
-                        viewModel = detailViewModel,
-                        onNavigateBack = { navController.popBackStack() },
-                        onRoomExited = {
-                            navController.popBackStack(Screen.Rooms.route, false)
-                        }
-                    )
-                }
-                composable(
-                    route = Screen.ScheduleDetail.route,
-                    arguments = listOf(navArgument("scheduleId") { type = NavType.LongType })
-                ) { backStackEntry ->
-                    val sId = backStackEntry.arguments?.getLong("scheduleId") ?: return@composable
-                    val detailViewModel: com.crescentapps.turnly.presentation.screens.schedule.ScheduleDetailViewModel = viewModel(key = "schedule_detail_$sId") {
-                        com.crescentapps.turnly.presentation.screens.schedule.ScheduleDetailViewModel(app.repository, sId)
-                    }
-                    com.crescentapps.turnly.presentation.m3expressive.screens.schedule.M3ScheduleDetailScreen(
-                        viewModel = detailViewModel,
-                        onNavigateBack = { navController.popBackStack() }
-                    )
-                }
-                composable(Screen.History.route) {
-                    val historyViewModel: HistoryViewModel = viewModel { HistoryViewModel(app.repository) }
-                    M3HistoryScreen(viewModel = historyViewModel)
-                }
-                composable(Screen.Settings.route) {
-                    val settingsViewModel: SettingsViewModel = viewModel {
-                        SettingsViewModel(app.userPreferencesRepository, app.repository, app.updateManager)
-                    }
-                    M3SettingsScreen(viewModel = settingsViewModel)
-                }
-                composable(Screen.CreateSchedule.route) {
-                    val formViewModel: ScheduleFormViewModel = viewModel { ScheduleFormViewModel(app.repository, app.roomRepository) }
-                    M3CreateScheduleScreen(
-                        viewModel = formViewModel,
-                        onNavigateBack = { navController.popBackStack() },
-                        onCreatedSuccessfully = { navController.popBackStack() }
-                    )
-                }
-            }
-        }
-    }
+            } // End of Box
+        } // End of Scaffold
+    } // End of TurnlyExpressiveTheme
 }

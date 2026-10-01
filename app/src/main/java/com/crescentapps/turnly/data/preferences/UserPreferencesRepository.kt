@@ -60,11 +60,23 @@ data class UserPreferences(
     val m3ColorPersonality: String = "BALANCED",
     val m3ColorIntensity: Float = 1.0f,
     val m3Contrast: String = "STANDARD",
-    val m3TypographyStyle: String = "SYSTEM",
+    val m3TypographyStyle: String = "GOOGLE_SANS",
     val m3TypographyEmphasis: String = "EXPRESSIVE",
     val m3Density: String = "STANDARD",
     val m3ShapePersonality: String = "EXPRESSIVE",
     val m3ShapeVariation: String = "MEDIUM",
+    val m3LightRaysEnabled: Boolean = false,
+    val m3GradientX: Float = 0.5f,
+    val m3GradientY: Float = 0f,
+    val m3GradientAngle: Float = 45f,
+    val m3GradientWidth: Float = 0.5f,
+    val m3GradientLength: Float = 1f,
+    val m3GradientSoftness: Float = 0.7f,
+    val m3GradientIntensity: Float = 0.35f,
+    val m3GradientColorSource: String = "PRIMARY",
+    
+    val m3ShapeMorphingEnabled: Boolean = true,
+    val m3DecorativeMotionEnabled: Boolean = true,
 
     // Typography
     val appFontFamily: String = "SF Pro Text",
@@ -211,6 +223,19 @@ class UserPreferencesRepository(private val context: Context) {
         val M3_DENSITY = stringPreferencesKey("m3_density")
         val M3_SHAPE_PERSONALITY = stringPreferencesKey("m3_shape_personality")
         val M3_SHAPE_VARIATION = stringPreferencesKey("m3_shape_variation")
+        val M3_LIGHT_RAYS_ENABLED = booleanPreferencesKey("m3_light_rays_enabled")
+        
+        val M3_GRADIENT_X = floatPreferencesKey("m3_gradient_x")
+        val M3_GRADIENT_Y = floatPreferencesKey("m3_gradient_y")
+        val M3_GRADIENT_ANGLE = floatPreferencesKey("m3_gradient_angle")
+        val M3_GRADIENT_WIDTH = floatPreferencesKey("m3_gradient_width")
+        val M3_GRADIENT_LENGTH = floatPreferencesKey("m3_gradient_length")
+        val M3_GRADIENT_SOFTNESS = floatPreferencesKey("m3_gradient_softness")
+        val M3_GRADIENT_INTENSITY = floatPreferencesKey("m3_gradient_intensity")
+        val M3_GRADIENT_COLOR_SOURCE = stringPreferencesKey("m3_gradient_color_source")
+        
+        val M3_SHAPE_MORPHING_ENABLED = booleanPreferencesKey("m3_shape_morphing_enabled")
+        val M3_DECORATIVE_MOTION_ENABLED = booleanPreferencesKey("m3_decorative_motion_enabled")
 
         val APP_FONT_FAMILY = stringPreferencesKey("app_font_family")
         val APP_FONT_WEIGHT = stringPreferencesKey("app_font_weight")
@@ -321,11 +346,22 @@ class UserPreferencesRepository(private val context: Context) {
             m3ColorPersonality = preferences[PreferencesKeys.M3_COLOR_PERSONALITY] ?: "BALANCED",
             m3ColorIntensity = (preferences[PreferencesKeys.M3_COLOR_INTENSITY] ?: 1.0f).coerceIn(0f, 1f),
             m3Contrast = preferences[PreferencesKeys.M3_CONTRAST] ?: "STANDARD",
-            m3TypographyStyle = preferences[PreferencesKeys.M3_TYPOGRAPHY_STYLE] ?: "SYSTEM",
+            m3TypographyStyle = preferences[PreferencesKeys.M3_TYPOGRAPHY_STYLE] ?: "GOOGLE_SANS",
             m3TypographyEmphasis = preferences[PreferencesKeys.M3_TYPOGRAPHY_EMPHASIS] ?: "EXPRESSIVE",
             m3Density = preferences[PreferencesKeys.M3_DENSITY] ?: "STANDARD",
             m3ShapePersonality = preferences[PreferencesKeys.M3_SHAPE_PERSONALITY] ?: "EXPRESSIVE",
             m3ShapeVariation = preferences[PreferencesKeys.M3_SHAPE_VARIATION] ?: "MEDIUM",
+            m3LightRaysEnabled = preferences[PreferencesKeys.M3_LIGHT_RAYS_ENABLED] ?: false,
+            m3GradientX = (preferences[PreferencesKeys.M3_GRADIENT_X] ?: 0.5f).coerceIn(0f, 1f),
+            m3GradientY = (preferences[PreferencesKeys.M3_GRADIENT_Y] ?: 0f).coerceIn(0f, 1f),
+            m3GradientAngle = (preferences[PreferencesKeys.M3_GRADIENT_ANGLE] ?: 45f).coerceIn(0f, 360f),
+            m3GradientWidth = (preferences[PreferencesKeys.M3_GRADIENT_WIDTH] ?: 0.5f).coerceIn(0f, 1f),
+            m3GradientLength = (preferences[PreferencesKeys.M3_GRADIENT_LENGTH] ?: 1f).coerceIn(0f, 2f),
+            m3GradientSoftness = (preferences[PreferencesKeys.M3_GRADIENT_SOFTNESS] ?: 0.7f).coerceIn(0f, 1f),
+            m3GradientIntensity = (preferences[PreferencesKeys.M3_GRADIENT_INTENSITY] ?: 0.35f).coerceIn(0f, 1f),
+            m3GradientColorSource = preferences[PreferencesKeys.M3_GRADIENT_COLOR_SOURCE] ?: "PRIMARY",
+            m3ShapeMorphingEnabled = preferences[PreferencesKeys.M3_SHAPE_MORPHING_ENABLED] ?: true,
+            m3DecorativeMotionEnabled = preferences[PreferencesKeys.M3_DECORATIVE_MOTION_ENABLED] ?: true,
 
             appFontFamily = preferences[PreferencesKeys.APP_FONT_FAMILY] ?: Defaults.DEFAULT_FONT_FAMILY,
             appFontWeight = preferences[PreferencesKeys.APP_FONT_WEIGHT] ?: Defaults.DEFAULT_FONT_WEIGHT,
@@ -534,6 +570,50 @@ class UserPreferencesRepository(private val context: Context) {
 
     suspend fun setM3ShapeVariation(variation: String) {
         context.dataStore.edit { it[PreferencesKeys.M3_SHAPE_VARIATION] = variation }
+    }
+
+    suspend fun setM3LightRaysEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.M3_LIGHT_RAYS_ENABLED] = enabled }
+    }
+
+    suspend fun setM3GradientX(x: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_X] = x.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setM3GradientY(y: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_Y] = y.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setM3GradientAngle(angle: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_ANGLE] = angle.coerceIn(0f, 360f) }
+    }
+
+    suspend fun setM3GradientWidth(width: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_WIDTH] = width.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setM3GradientLength(length: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_LENGTH] = length.coerceIn(0f, 2f) }
+    }
+
+    suspend fun setM3GradientSoftness(softness: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_SOFTNESS] = softness.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setM3GradientIntensity(intensity: Float) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_INTENSITY] = intensity.coerceIn(0f, 1f) }
+    }
+
+    suspend fun setM3GradientColorSource(source: String) {
+        context.dataStore.edit { it[PreferencesKeys.M3_GRADIENT_COLOR_SOURCE] = source }
+    }
+
+    suspend fun setM3ShapeMorphingEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.M3_SHAPE_MORPHING_ENABLED] = enabled }
+    }
+
+    suspend fun setM3DecorativeMotionEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[PreferencesKeys.M3_DECORATIVE_MOTION_ENABLED] = enabled }
     }
 
     suspend fun setAppFontFamily(family: String) {

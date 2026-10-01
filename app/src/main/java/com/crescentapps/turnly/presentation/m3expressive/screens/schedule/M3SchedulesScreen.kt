@@ -18,7 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.crescentapps.turnly.core.model.Schedule
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveCard
-import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveSplitButton
+import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveButton
+import com.crescentapps.turnly.presentation.m3expressive.components.expressiveLightRay
 import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveTokens
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,13 +41,10 @@ fun M3SchedulesScreen(
                     ) 
                 },
                 actions = {
-                    TurnlyExpressiveSplitButton(
-                        onPrimaryClick = onCreateSchedule,
-                        onOptionSelected = { _ ->
-                            onCreateSchedule()
-                        },
-                        primaryText = "New",
-                        primaryIcon = { Icon(Icons.Default.Add, contentDescription = null) }
+                    TurnlyExpressiveButton(
+                        onClick = onCreateSchedule,
+                        text = "New",
+                        icon = { Icon(Icons.Default.Add, contentDescription = null) }
                     )
                 }
             )
@@ -58,7 +56,8 @@ fun M3SchedulesScreen(
                 onClick = onCreateSchedule,
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.expressiveLightRay(shape = CircleShape)
             )
         }
     ) { padding ->

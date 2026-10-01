@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontVariation
 import com.crescentapps.turnly.R
+import com.crescentapps.turnly.data.preferences.UserPreferences
+
+val LocalUserPreferences = staticCompositionLocalOf { UserPreferences() }
 
 data class TurnlySpacing(
     val micro: Dp = 4.dp,

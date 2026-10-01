@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.crescentapps.turnly.core.model.ThemeMode
 import com.crescentapps.turnly.core.model.UiSystemMode
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveCard
@@ -212,34 +213,32 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                         val personalities = listOf(
                             "VIBRANT" to "Vibrant",
                             "BALANCED" to "Balanced",
-                            "CALM" to "Calm"
+                            "CALM" to "Calm",
+                            "PLAYFUL" to "Playful",
+                            "ELEGANT" to "Elegant",
+                            "MONOCHROME" to "Mono",
+                            "NATURE" to "Nature"
                         )
 
-                        SingleChoiceSegmentedButtonRow(
-                            modifier = Modifier.fillMaxWidth()
+                        @OptIn(ExperimentalLayoutApi::class)
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            personalities.forEachIndexed { index, (pKey, label) ->
+                            personalities.forEach { (pKey, label) ->
                                 val isSelected = prefs.m3ColorPersonality == pKey
-                                SegmentedButton(
+                                FilterChip(
                                     selected = isSelected,
                                     onClick = { viewModel.updateM3ColorPersonality(pKey) },
-                                    shape = SegmentedButtonDefaults.itemShape(index = index, count = personalities.size),
-                                    icon = {
-                                        if (isSelected) {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                        }
+                                    label = {
+                                        Text(
+                                            text = label,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                        )
                                     }
-                                ) {
-                                    Text(
-                                        text = label,
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                                    )
-                                }
+                                )
                             }
                         }
 
@@ -545,6 +544,51 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                             Text("Expressive Motion", fontWeight = FontWeight.SemiBold)
                         }
 
+                        ListItem(
+                            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                            supportingContent = {
+                                Text("Allow expressive shape transformations")
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = prefs.m3ShapeMorphingEnabled,
+                                    onCheckedChange = { viewModel.setM3ShapeMorphingEnabled(it) }
+                                )
+                            }
+                        ) {
+                            Text("Shape Morphing", fontWeight = FontWeight.SemiBold)
+                        }
+                        
+                        ListItem(
+                            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                            supportingContent = {
+                                Text("Allow non-essential animated visual effects")
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = prefs.m3DecorativeMotionEnabled,
+                                    onCheckedChange = { viewModel.setM3DecorativeMotionEnabled(it) }
+                                )
+                            }
+                        ) {
+                            Text("Decorative Motion", fontWeight = FontWeight.SemiBold)
+                        }
+
+                        ListItem(
+                            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                            supportingContent = {
+                                Text("Minimize expressive and decorative movement")
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = prefs.isReduceMotion,
+                                    onCheckedChange = { viewModel.setReduceMotion(it) }
+                                )
+                            }
+                        ) {
+                            Text("Reduce Motion", fontWeight = FontWeight.SemiBold)
+                        }
+
                         Spacer(modifier = Modifier.height(16.dp))
 
                         OutlinedButton(
@@ -559,6 +603,193 @@ fun M3SettingsScreen(viewModel: SettingsViewModel) {
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Reset Appearance Defaults", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+
+            // Gradient Fills & Light Rays
+            item {
+                TurnlyExpressiveCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        Text(
+                            text = "Gradient Fills",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        ListItem(
+                            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                            supportingContent = {
+                                Text("Configurable directional gradient light wash")
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = prefs.m3LightRaysEnabled,
+                                    onCheckedChange = { viewModel.setM3LightRaysEnabled(it) }
+                                )
+                            }
+                        ) {
+                            Text("Gradient Fills", fontWeight = FontWeight.SemiBold)
+                        }
+
+                        if (prefs.m3LightRaysEnabled) {
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            Text(
+                                text = "Gradient Source",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            val sources = listOf(
+                                "PRIMARY" to "Primary",
+                                "SECONDARY" to "Secondary",
+                                "TERTIARY" to "Tertiary"
+                            )
+
+                            SingleChoiceSegmentedButtonRow(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                sources.forEachIndexed { index, (key, label) ->
+                                    val isSelected = prefs.m3GradientColorSource == key
+                                    SegmentedButton(
+                                        selected = isSelected,
+                                        onClick = { viewModel.setM3GradientColorSource(key) },
+                                        shape = SegmentedButtonDefaults.itemShape(index = index, count = sources.size),
+                                        icon = {
+                                            if (isSelected) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp)
+                                                )
+                                            }
+                                        }
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(text = "Presets", style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Button(
+                                    onClick = { 
+                                        viewModel.setM3GradientX(0f)
+                                        viewModel.setM3GradientY(0f)
+                                        viewModel.setM3GradientAngle(45f)
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    contentPadding = PaddingValues(horizontal = 4.dp)
+                                ) { Text("Top Left", fontSize = 12.sp) }
+                                
+                                Button(
+                                    onClick = { 
+                                        viewModel.setM3GradientX(1f)
+                                        viewModel.setM3GradientY(0f)
+                                        viewModel.setM3GradientAngle(135f)
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    contentPadding = PaddingValues(horizontal = 4.dp)
+                                ) { Text("Top Right", fontSize = 12.sp) }
+                                
+                                Button(
+                                    onClick = { 
+                                        viewModel.setM3GradientX(0.5f)
+                                        viewModel.setM3GradientY(0f)
+                                        viewModel.setM3GradientAngle(90f)
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(12.dp),
+                                    contentPadding = PaddingValues(horizontal = 4.dp)
+                                ) { Text("Top Down", fontSize = 12.sp) }
+                            }
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            var sliderX by remember(prefs.m3GradientX) { mutableFloatStateOf(prefs.m3GradientX) }
+                            Text("Light Position X", style = MaterialTheme.typography.titleMedium)
+                            Slider(
+                                value = sliderX,
+                                onValueChange = { sliderX = it },
+                                onValueChangeFinished = { viewModel.setM3GradientX(sliderX) },
+                                valueRange = 0f..1f
+                            )
+
+                            var sliderY by remember(prefs.m3GradientY) { mutableFloatStateOf(prefs.m3GradientY) }
+                            Text("Light Position Y", style = MaterialTheme.typography.titleMedium)
+                            Slider(
+                                value = sliderY,
+                                onValueChange = { sliderY = it },
+                                onValueChangeFinished = { viewModel.setM3GradientY(sliderY) },
+                                valueRange = 0f..1f
+                            )
+
+                            var sliderAngle by remember(prefs.m3GradientAngle) { mutableFloatStateOf(prefs.m3GradientAngle) }
+                            Text("Direction (°)", style = MaterialTheme.typography.titleMedium)
+                            Slider(
+                                value = sliderAngle,
+                                onValueChange = { sliderAngle = it },
+                                onValueChangeFinished = { viewModel.setM3GradientAngle(sliderAngle) },
+                                valueRange = 0f..360f
+                            )
+
+                            var sliderWidth by remember(prefs.m3GradientWidth) { mutableFloatStateOf(prefs.m3GradientWidth) }
+                            Text("Width", style = MaterialTheme.typography.titleMedium)
+                            Slider(
+                                value = sliderWidth,
+                                onValueChange = { sliderWidth = it },
+                                onValueChangeFinished = { viewModel.setM3GradientWidth(sliderWidth) },
+                                valueRange = 0f..1f
+                            )
+
+                            var sliderLength by remember(prefs.m3GradientLength) { mutableFloatStateOf(prefs.m3GradientLength) }
+                            Text("Length", style = MaterialTheme.typography.titleMedium)
+                            Slider(
+                                value = sliderLength,
+                                onValueChange = { sliderLength = it },
+                                onValueChangeFinished = { viewModel.setM3GradientLength(sliderLength) },
+                                valueRange = 0f..2f
+                            )
+
+                            var sliderSoftness by remember(prefs.m3GradientSoftness) { mutableFloatStateOf(prefs.m3GradientSoftness) }
+                            Text("Softness", style = MaterialTheme.typography.titleMedium)
+                            Slider(
+                                value = sliderSoftness,
+                                onValueChange = { sliderSoftness = it },
+                                onValueChangeFinished = { viewModel.setM3GradientSoftness(sliderSoftness) },
+                                valueRange = 0f..1f
+                            )
+
+                            var sliderIntensity by remember(prefs.m3GradientIntensity) { mutableFloatStateOf(prefs.m3GradientIntensity) }
+                            Text("Intensity", style = MaterialTheme.typography.titleMedium)
+                            Slider(
+                                value = sliderIntensity,
+                                onValueChange = { sliderIntensity = it },
+                                onValueChangeFinished = { viewModel.setM3GradientIntensity(sliderIntensity) },
+                                valueRange = 0f..1f
+                            )
                         }
                     }
                 }

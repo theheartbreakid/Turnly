@@ -30,7 +30,7 @@ fun TurnlyExpressiveCard(
     if (onClick != null) {
         Card(
             onClick = onClick,
-            modifier = modifier,
+            modifier = modifier.expressiveLightRay(shape = shape),
             shape = shape,
             colors = colors,
             elevation = elevation,
@@ -38,7 +38,7 @@ fun TurnlyExpressiveCard(
         )
     } else {
         Card(
-            modifier = modifier,
+            modifier = modifier.expressiveLightRay(shape = shape),
             shape = shape,
             colors = colors,
             elevation = elevation,
@@ -70,7 +70,7 @@ fun TurnlyExpressiveButton(
     if (isPrimary || isDestructive) {
         Button(
             onClick = onClick, 
-            modifier = modifier, 
+            modifier = modifier.expressiveLightRay(shape = ExpressiveShapes.Full), 
             colors = colors,
             shape = ExpressiveShapes.Full
         ) {
@@ -83,7 +83,7 @@ fun TurnlyExpressiveButton(
     } else {
         FilledTonalButton(
             onClick = onClick, 
-            modifier = modifier, 
+            modifier = modifier.expressiveLightRay(shape = ExpressiveShapes.Full), 
             colors = colors,
             shape = ExpressiveShapes.Full
         ) {
@@ -99,73 +99,20 @@ fun TurnlyExpressiveButton(
 @Composable
 fun TurnlyExpressiveSplitButton(
     onPrimaryClick: () -> Unit,
-    onOptionSelected: (String) -> Unit = {},
     primaryText: String = "New Schedule",
     modifier: Modifier = Modifier,
     primaryIcon: (@Composable () -> Unit)? = null
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Button(
-                onClick = onPrimaryClick,
-                shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 4.dp, bottomEnd = 4.dp)
-            ) {
-                if (primaryIcon != null) {
-                    primaryIcon()
-                    Spacer(Modifier.width(8.dp))
-                }
-                Text(primaryText, fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.width(2.dp))
-            FilledTonalButton(
-                onClick = { expanded = true },
-                shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 24.dp, bottomEnd = 24.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp)
-            ) {
-                Text("▼", fontSize = 12.sp)
-            }
+    Button(
+        onClick = onPrimaryClick,
+        shape = ExpressiveShapes.Full,
+        modifier = modifier
+    ) {
+        if (primaryIcon != null) {
+            primaryIcon()
+            Spacer(Modifier.width(8.dp))
         }
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            DropdownMenuItem(
-                text = { Text("From Template") },
-                leadingIcon = { Icon(Icons.Default.FileCopy, contentDescription = null) },
-                onClick = {
-                    expanded = false
-                    onOptionSelected("TEMPLATE")
-                }
-            )
-            DropdownMenuItem(
-                text = { Text("Import from File") },
-                leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
-                onClick = {
-                    expanded = false
-                    onOptionSelected("IMPORT")
-                }
-            )
-            DropdownMenuItem(
-                text = { Text("Duplicate Schedule") },
-                leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
-                onClick = {
-                    expanded = false
-                    onOptionSelected("DUPLICATE")
-                }
-            )
-            DropdownMenuItem(
-                text = { Text("Create from Calendar") },
-                leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
-                onClick = {
-                    expanded = false
-                    onOptionSelected("CALENDAR")
-                }
-            )
-        }
+        Text(primaryText, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -194,13 +141,25 @@ fun TurnlyExpressiveLivePreview(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
-                    onClick = {},
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.extraLarge
+                // Here we apply the expressiveLightRay modifier for live preview
+                // It will only render if enabled, and read current local composition
+                val primaryColor = MaterialTheme.colorScheme.primary
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp)
+                        .expressiveLightRay(
+                            shape = MaterialTheme.shapes.extraLarge
+                        ),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = primaryColor,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Text("Primary")
+                    Box(contentAlignment = Alignment.Center) {
+                        Text("Primary", fontWeight = FontWeight.Bold)
+                    }
                 }
+                
                 FilledTonalButton(
                     onClick = {},
                     modifier = Modifier.weight(1f),

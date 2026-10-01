@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.crescentapps.turnly.core.model.SyncState
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveButton
 import com.crescentapps.turnly.presentation.m3expressive.components.TurnlyExpressiveCard
+import com.crescentapps.turnly.presentation.m3expressive.components.expressiveLightRay
 import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveTokens
 import com.crescentapps.turnly.presentation.screens.room.RoomViewModel
 
@@ -69,7 +70,8 @@ fun M3RoomsScreen(
                 text = { Text("New Room", fontWeight = FontWeight.Bold) },
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.expressiveLightRay(shape = CircleShape)
             )
         }
     ) { padding ->
