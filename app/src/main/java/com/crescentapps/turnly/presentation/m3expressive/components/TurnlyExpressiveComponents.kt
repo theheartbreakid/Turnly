@@ -2,12 +2,19 @@ package com.crescentapps.turnly.presentation.m3expressive.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.FileCopy
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveTokens
 import com.crescentapps.turnly.presentation.m3expressive.theme.ExpressiveShapes
 
@@ -89,36 +96,135 @@ fun TurnlyExpressiveButton(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun TurnlyExpressiveSplitButton(
     onPrimaryClick: () -> Unit,
-    onSecondaryClick: () -> Unit,
-    primaryText: String,
+    onOptionSelected: (String) -> Unit = {},
+    primaryText: String = "New Schedule",
     modifier: Modifier = Modifier,
     primaryIcon: (@Composable () -> Unit)? = null
 ) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Button(
-            onClick = onPrimaryClick,
-            shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 4.dp, bottomEnd = 4.dp)
-        ) {
-            if (primaryIcon != null) {
-                primaryIcon()
-                Spacer(Modifier.width(ExpressiveTokens.spacing.small))
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Button(
+                onClick = onPrimaryClick,
+                shape = RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 4.dp, bottomEnd = 4.dp)
+            ) {
+                if (primaryIcon != null) {
+                    primaryIcon()
+                    Spacer(Modifier.width(8.dp))
+                }
+                Text(primaryText, fontWeight = FontWeight.Bold)
             }
-            Text(primaryText)
+            Spacer(Modifier.width(2.dp))
+            FilledTonalButton(
+                onClick = { expanded = true },
+                shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 24.dp, bottomEnd = 24.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp)
+            ) {
+                Text("▼", fontSize = 12.sp)
+            }
         }
-        Spacer(Modifier.width(2.dp))
-        FilledTonalButton(
-            onClick = onSecondaryClick,
-            shape = RoundedCornerShape(topStart = 4.dp, bottomStart = 4.dp, topEnd = 24.dp, bottomEnd = 24.dp),
-            contentPadding = PaddingValues(horizontal = 12.dp)
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            shape = RoundedCornerShape(16.dp)
         ) {
-            Text("▼")
+            DropdownMenuItem(
+                text = { Text("From Template") },
+                leadingIcon = { Icon(Icons.Default.FileCopy, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onOptionSelected("TEMPLATE")
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Import from File") },
+                leadingIcon = { Icon(Icons.Default.FileDownload, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onOptionSelected("IMPORT")
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Duplicate Schedule") },
+                leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onOptionSelected("DUPLICATE")
+                }
+            )
+            DropdownMenuItem(
+                text = { Text("Create from Calendar") },
+                leadingIcon = { Icon(Icons.Default.CalendarMonth, contentDescription = null) },
+                onClick = {
+                    expanded = false
+                    onOptionSelected("CALENDAR")
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun TurnlyExpressiveLivePreview(
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 2.dp
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Live Appearance Preview",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = {},
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.extraLarge
+                ) {
+                    Text("Primary")
+                }
+                FilledTonalButton(
+                    onClick = {},
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.extraLarge
+                ) {
+                    Text("Tonal")
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilterChip(
+                    selected = true,
+                    onClick = {},
+                    label = { Text("Active Chip") }
+                )
+                AssistChip(
+                    onClick = {},
+                    label = { Text("Next Turn • 2:00 PM") }
+                )
+            }
         }
     }
 }

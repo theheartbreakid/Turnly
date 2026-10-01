@@ -1,6 +1,6 @@
 package com.crescentapps.turnly.presentation.m3expressive.navigation
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -56,75 +56,82 @@ fun M3ExpressiveDock(
     onNavigate: (M3NavDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    Box(
         modifier = modifier
+            .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-            .shadow(
-                elevation = 12.dp,
-                shape = CircleShape,
-                clip = false
-            ),
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.95f),
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = 6.dp
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
+        Surface(
             modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 6.dp)
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+                .shadow(
+                    elevation = 12.dp,
+                    shape = CircleShape,
+                    clip = false
+                ),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.95f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = 6.dp
         ) {
-            M3NavDestination.entries.forEach { destination ->
-                val isSelected = currentRoute == destination.route
-                
-                M3DockItem(
-                    destination = destination,
-                    isSelected = isSelected,
-                    onClick = { onNavigate(destination) }
-                )
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 6.dp)
+                    .animateContentSize(animationSpec = MaterialTheme.motionScheme.defaultSpatialSpec()),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                M3NavDestination.entries.forEach { destination ->
+                    val isSelected = currentRoute == destination.route
+                    
+                    M3DockItem(
+                        destination = destination,
+                        isSelected = isSelected,
+                        onClick = { onNavigate(destination) }
+                    )
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun M3DockItem(
     destination: M3NavDestination,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val containerColor by animateColorAsState(
+    val containerColor by androidx.compose.animation.animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.primary
         } else {
             MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0f)
         },
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "dock_item_color"
     )
 
-    val contentColor by animateColorAsState(
+    val contentColor by androidx.compose.animation.animateColorAsState(
         targetValue = if (isSelected) {
             MaterialTheme.colorScheme.onPrimary
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
         label = "dock_item_content_color"
     )
 
     val cornerRadius by animateDpAsState(
         targetValue = if (isSelected) 24.dp else 16.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
         label = "dock_item_corner"
     )
 
     val elevation by animateDpAsState(
         targetValue = if (isSelected) 4.dp else 0.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        animationSpec = MaterialTheme.motionScheme.fastSpatialSpec(),
         label = "dock_item_elevation"
     )
 
@@ -145,7 +152,8 @@ private fun M3DockItem(
                 selected = isSelected
                 contentDescription = destination.label
             }
-            .padding(horizontal = if (isSelected) 12.dp else 8.dp, vertical = 8.dp),
+            .padding(horizontal = if (isSelected) 16.dp else 10.dp, vertical = 10.dp)
+            .animateContentSize(animationSpec = MaterialTheme.motionScheme.fastSpatialSpec()),
         contentAlignment = Alignment.Center
     ) {
         Row(
@@ -156,18 +164,18 @@ private fun M3DockItem(
                 imageVector = destination.icon,
                 contentDescription = null,
                 tint = contentColor,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(24.dp)
             )
 
             if (isSelected) {
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = destination.label,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     color = contentColor,
                     maxLines = 1,
-                    fontSize = 12.sp
+                    fontSize = 14.sp
                 )
             }
         }

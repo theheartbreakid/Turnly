@@ -165,7 +165,7 @@ fun TurnlyExpressiveTheme(
 ) {
     val context = LocalContext.current
     
-    val baseColorScheme = when {
+    val rawColorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
@@ -176,6 +176,24 @@ fun TurnlyExpressiveTheme(
         }
     }
 
+    // Apply color intensity scaling to container colors and primary tones
+    val intensity = prefs.m3ColorIntensity.coerceIn(0.2f, 1.2f)
+    val baseColorScheme = if (intensity != 1.0f) {
+        rawColorScheme.copy(
+            primaryContainer = rawColorScheme.primaryContainer.copy(
+                alpha = (rawColorScheme.primaryContainer.alpha * intensity).coerceIn(0.3f, 1.0f)
+            ),
+            secondaryContainer = rawColorScheme.secondaryContainer.copy(
+                alpha = (rawColorScheme.secondaryContainer.alpha * intensity).coerceIn(0.3f, 1.0f)
+            ),
+            tertiaryContainer = rawColorScheme.tertiaryContainer.copy(
+                alpha = (rawColorScheme.tertiaryContainer.alpha * intensity).coerceIn(0.3f, 1.0f)
+            )
+        )
+    } else {
+        rawColorScheme
+    }
+
     val motionScheme = if (useExpressiveMotion && !prefs.isReduceMotion) {
         MotionScheme.expressive()
     } else {
@@ -184,7 +202,7 @@ fun TurnlyExpressiveTheme(
 
     val spacing = getSpacingForDensity(prefs.m3Density)
     val shapes = getShapesForPersonality(prefs.m3ShapePersonality, prefs.m3ShapeVariation)
-    val typography = getTypographyForStyle(prefs.m3TypographyStyle, prefs.m3TypographyEmphasis)
+    val typography = getTypographyForStyle(prefs.m3TypographyStyle, prefs.m3TypographyEmphasis, prefs.m3ShapePersonality)
 
     val view = LocalView.current
     if (!view.isInEditMode) {
